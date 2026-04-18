@@ -8,6 +8,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { Home } from './pages/public/Home';
 import { Login } from './pages/public/Login';
 import { Register } from './pages/public/Register';
+import { Contact } from './pages/public/Contact';
 
 // Dashboard Pages
 import { StudentDashboard } from './pages/student/StudentDashboard';
@@ -61,7 +62,7 @@ export default function App() {
             <Route path="/about" element={<Placeholder name="About Us" />} />
             <Route path="/courses" element={<Placeholder name="Our Courses" />} />
             <Route path="/testimonials" element={<Placeholder name="Testimonials" />} />
-            <Route path="/contact" element={<Placeholder name="Contact Us" />} />
+            <Route path="/contact" element={<Contact />} />
           </Route>
 
           {/* Auth Routes */}

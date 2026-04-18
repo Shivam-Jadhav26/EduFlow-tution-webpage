@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { 
   CheckCircle2, BookOpen, Users, Trophy, ArrowRight, Star, 
-  GraduationCap, Laptop, PhoneCall, ShieldCheck, ChevronRight 
+  GraduationCap, Laptop, PhoneCall, ShieldCheck, ChevronRight,
+  ClipboardList
 } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
@@ -10,10 +12,25 @@ import { HeroSlider } from '../../components/public/HeroSlider';
 import { TestimonialSlider } from '../../components/public/TestimonialSlider';
 import { PartnerMarquee } from '../../components/public/PartnerMarquee';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
 
 export const Home = () => {
   const { isAuthenticated, role } = useAuth();
   const dashboardLink = role === 'admin' ? '/admin/dashboard' : '/student/dashboard';
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchPublicStats = async () => {
+      try {
+        const response = await api.get('/dashboard/public');
+        setData(response.data.data);
+      } catch (err) {
+        console.error('Failed to fetch public stats', err);
+      }
+    };
+    fetchPublicStats();
+  }, []);
+
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     whileInView: { opacity: 1, y: 0 },
@@ -26,6 +43,12 @@ export const Home = () => {
     { title: 'Quality Material', desc: 'Curated notes and practice sets for Classes 6-10.', icon: BookOpen },
     { title: 'Weekly Assessments', desc: 'Regular tests to track progress and identify weak areas.', icon: ClipboardList },
     { title: 'Result Oriented', desc: 'Proven track record of high scores in board exams.', icon: Trophy }
+  ];
+
+  const defaultCourses = [
+    { grade: 10, title: 'Class 10 Foundation', desc: 'Master core subjects including Calculus basics, Organic Chemistry.', subjectsCount: 12, img: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=600&h=400' },
+    { grade: 9, title: 'Class 9 Foundation', desc: 'Build profound understanding in Mathematics and Sciences.', subjectsCount: 10, img: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=600&h=400' },
+    { grade: 8, title: 'Class 8 Core', desc: 'Step stone phase for advanced high-school dynamics.', subjectsCount: 8, img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=600&h=400' }
   ];
 
   return (
@@ -77,11 +100,11 @@ export const Home = () => {
                   {isAuthenticated ? 'Go to Dashboard' : 'Start Your Journey'} <ArrowRight size={20} />
                 </Button>
               </Link>
-              <Link to="/courses">
+              <a href="#courses">
                 <Button variant="outline" size="lg" className="rounded-full font-bold">
                   Explore Courses
                 </Button>
-              </Link>
+              </a>
             </motion.div>
 
             <motion.div 
@@ -96,7 +119,7 @@ export const Home = () => {
                 ))}
               </div>
               <p className="text-sm font-medium text-slate-500">
-                <span className="text-slate-900 font-bold">500+</span> Students Joined
+                <span className="text-slate-900 font-bold">{data?.totalStudents || '500+'}</span> Students Joined
               </p>
             </motion.div>
           </div>
@@ -117,7 +140,7 @@ export const Home = () => {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-500 uppercase">Success Rate</p>
-                  <p className="text-xl font-extrabold text-slate-900">98.5%</p>
+                  <p className="text-xl font-extrabold text-slate-900">{data?.successRate || '98.5%'}</p>
                 </div>
               </div>
             </div>
@@ -131,9 +154,9 @@ export const Home = () => {
       <section className="py-20 bg-slate-900 text-white px-6 lg:px-12">
         <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-8">
           {[
-            { label: 'Classes Covered', val: '6 - 10' },
-            { label: 'Subjects', val: '12+' },
-            { label: 'Monthly Tests', val: '50+' },
+            { label: 'Classes Covered', val: data?.classesCovered || '6 - 10' },
+            { label: 'Subjects', val: data?.subjectsCount || '12+' },
+            { label: 'Monthly Tests', val: data?.monthlyTests || '50+' },
             { label: 'Happy Parents', val: '2k+' }
           ].map((stat, i) => (
             <motion.div key={i} {...fadeInUp} className="text-center group">
@@ -145,7 +168,7 @@ export const Home = () => {
       </section>
 
       {/* Courses Section Preview */}
-      <section className="py-24 px-6 lg:px-12 bg-white">
+      <section id="courses" className="py-24 px-6 lg:px-12 bg-white">
         <div className="max-w-7xl mx-auto text-center mb-16">
           <motion.h2 {...fadeInUp} className="text-3xl lg:text-4xl font-black text-slate-900 mb-6">
             Courses for Every Grade
@@ -156,21 +179,19 @@ export const Home = () => {
         </div>
 
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { grade: 10, img: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=600&h=400' },
-            { grade: 9, img: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=600&h=400' },
-            { grade: 8, img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=600&h=400' }
-          ].map((course) => (
-            <motion.div key={course.grade} {...fadeInUp}>
+          {(data?.coursesPreview || defaultCourses).map((course: any, idx: number) => (
+            <motion.div key={idx} {...fadeInUp}>
               <Card className="group cursor-pointer">
                 <div className="aspect-video rounded-xl overflow-hidden mb-6">
-                  <img src={course.img} alt={`Class ${course.grade}`} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                  <img src={course.img} alt={course.title} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                 </div>
-                <h3 className="text-xl font-bold mb-3 italic">Class {course.grade} Foundation</h3>
-                <p className="text-sm text-slate-500 mb-6">Master core subjects including Calculus basics, Organic Chemistry, and advanced Civics.</p>
+                <h3 className="text-xl font-bold mb-3 italic">{course.title}</h3>
+                <p className="text-sm text-slate-500 mb-6 line-clamp-2">{course.desc}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-primary font-bold">12 Subjects</span>
-                  <Button variant="outline" size="sm" className="gap-2">Learn More <ChevronRight size={14} /></Button>
+                  <span className="text-primary font-bold">{course.subjectsCount} Subjects</span>
+                  <Link to="/contact">
+                    <Button variant="outline" size="sm" className="gap-2">Learn More <ChevronRight size={14} /></Button>
+                  </Link>
                 </div>
               </Card>
             </motion.div>
@@ -209,7 +230,9 @@ export const Home = () => {
                 </li>
               ))}
             </ul>
-            <Button size="lg" className="rounded-full">Request a Demo</Button>
+            <Link to="/contact">
+              <Button size="lg" className="rounded-full">Request a Demo</Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -250,6 +273,3 @@ export const Home = () => {
     </div>
   );
 };
-
-// Simple icon for feature list that was missing
-const ClipboardList = (props: any) => <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>;
