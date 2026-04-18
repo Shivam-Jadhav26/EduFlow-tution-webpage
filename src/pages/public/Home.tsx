@@ -29,12 +29,12 @@ export const Home = () => {
   ];
 
   return (
-    <div className="pt-20">
+    <div className="pt-20 transition-colors duration-300">
       {/* Hero Section */}
-      <section className="relative py-20 lg:py-32 overflow-hidden px-6 lg:px-12">
+      <section className="relative py-20 lg:py-32 overflow-hidden px-6 lg:px-12 bg-white dark:bg-slate-950 transition-colors duration-300">
         <div className="absolute top-0 left-0 w-full h-full -z-10 overflow-hidden">
-          <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-50 animate-pulse" />
-          <div className="absolute top-1/2 -right-24 w-80 h-80 bg-secondary/10 rounded-full blur-3xl opacity-50" />
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 dark:bg-primary/20 rounded-full blur-3xl opacity-50 animate-pulse" />
+          <div className="absolute top-1/2 -right-24 w-80 h-80 bg-secondary/10 dark:bg-secondary/20 rounded-full blur-3xl opacity-50" />
         </div>
 
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
@@ -42,7 +42,7 @@ export const Home = () => {
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full border border-primary/20"
+              className="inline-flex items-center gap-2 bg-primary/10 dark:bg-primary/950 px-4 py-2 rounded-full border border-primary/20"
             >
               <span className="text-primary font-bold text-xs uppercase tracking-wider">Top Rated Tuition Center</span>
             </motion.div>
@@ -51,7 +51,7 @@ export const Home = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-5xl lg:text-7xl font-extrabold leading-[1.1] text-slate-900"
+              className="text-5xl lg:text-7xl font-extrabold leading-[1.1] text-slate-900 dark:text-white"
             >
               Master Your Subjects with <span className="text-primary">EduFlow</span>
             </motion.h1>
@@ -60,7 +60,7 @@ export const Home = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-lg lg:text-xl text-slate-600 max-w-2xl"
+              className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-2xl"
             >
               The most advanced tuition management platform for Class 6 to 10 students. 
               Modern teaching, real-time tracking, and board-topping results.

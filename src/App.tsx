@@ -47,11 +47,14 @@ const Placeholder = ({ name }: { name: string }) => (
   </div>
 );
 
+import { ThemeProvider } from './context/ThemeContext';
+
 export default function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Routes>
+      <ThemeProvider>
+        <AuthProvider>
+          <Routes>
           {/* Public Routes */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
@@ -107,6 +110,7 @@ export default function App() {
           <Route path="*" element={<Placeholder name="404 - Not Found" />} />
         </Routes>
       </AuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }

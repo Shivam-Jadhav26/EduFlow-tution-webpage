@@ -36,7 +36,7 @@ export const Login = () => {
 
     try {
       const response = await api.post('/auth/login', { email, password });
-      
+
       const { token, user } = response.data.data;
 
       // If a specific login button was clicked (student vs admin), verify role matches
@@ -59,7 +59,7 @@ export const Login = () => {
     <div className="min-h-screen flex">
       {/* Left side - Form */}
       <div className="flex-1 flex flex-col justify-center px-8 lg:px-20 bg-white">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="max-w-md w-full mx-auto space-y-8"
@@ -76,7 +76,7 @@ export const Login = () => {
           </div>
 
           {error && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="p-4 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-3 text-red-600 text-sm font-bold italic"
@@ -88,7 +88,7 @@ export const Login = () => {
 
           <form onSubmit={(e) => handleLogin(e)} className="space-y-8">
             <div className="space-y-4">
-              <Input 
+              <Input
                 label="Email Address"
                 placeholder="name@example.com"
                 type="email"
@@ -97,7 +97,7 @@ export const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <Input 
+              <Input
                 label="Password"
                 placeholder="••••••••"
                 type="password"
@@ -117,24 +117,24 @@ export const Login = () => {
             </div>
 
             <div className="grid grid-cols-1 gap-4">
-              <Button 
+              <Button
                 type="submit"
-                size="lg" 
+                size="lg"
                 className="w-full gap-2 font-bold"
                 onClick={(e) => handleLogin(e, 'student')}
                 disabled={isLoading}
               >
                 {isLoading ? 'Signing in...' : 'Sign in as Student'} <ArrowRight size={20} />
               </Button>
-              
+
               <div className="relative py-2">
                 <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-100"></span></div>
                 <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-slate-400 font-bold tracking-tighter">Admin Access Only</span></div>
               </div>
 
-              <Button 
-                variant="outline" 
-                size="lg" 
+              <Button
+                variant="outline"
+                size="lg"
                 className="w-full border-slate-200 text-slate-700 font-bold"
                 onClick={(e) => handleLogin(e, 'admin')}
                 disabled={isLoading}
@@ -156,8 +156,8 @@ export const Login = () => {
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary rounded-full blur-[120px]" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-600 rounded-full blur-[120px]" />
         </div>
-        
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="relative z-10 space-y-12 max-w-lg text-center"
@@ -178,7 +178,7 @@ export const Login = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="flex justify-center gap-12 text-white/40">
             <div className="flex flex-col items-center gap-2">
               <div className="text-3xl font-black italic">500+</div>

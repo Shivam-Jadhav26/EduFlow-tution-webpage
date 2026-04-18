@@ -67,18 +67,18 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       {/* Sidebar */}
       <aside 
         className={cn(
-          "fixed top-0 left-0 bottom-0 bg-white border-r border-slate-200 z-50 w-64 flex flex-col transition-transform duration-300 transform lg:translate-x-0",
+          "fixed top-0 left-0 bottom-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50 w-64 flex flex-col transition-all duration-300 transform lg:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <div className="bg-primary p-1.5 rounded-lg">
               <BookOpen className="text-white w-5 h-5" />
             </div>
-            <span className="text-lg font-bold tracking-tight text-slate-900">EduFlow</span>
+            <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">EduFlow</span>
           </Link>
-          <Button variant="ghost" size="icon" className="lg:hidden" onClick={onClose}>
+          <Button variant="ghost" size="icon" className="lg:hidden dark:text-slate-300" onClick={onClose}>
             <X size={20} />
           </Button>
         </div>
@@ -90,23 +90,24 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               to={link.path}
               onClick={() => { if(window.innerWidth < 1024) onClose(); }}
               className={({ isActive }) => cn(
-                "sidebar-link group",
-                isActive && "sidebar-link-active"
+                "sidebar-link group transition-colors",
+                "dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200",
+                isActive && "sidebar-link-active dark:bg-primary/20 dark:text-primary"
               )}
             >
               <link.icon size={20} className={cn(
                 "group-hover:scale-110 transition-transform",
-                "text-slate-400 group-hover:text-primary"
+                "text-slate-400 dark:text-slate-500 group-hover:text-primary dark:group-hover:text-primary"
               )} />
               <span>{link.name}</span>
             </NavLink>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-slate-100">
+        <div className="p-4 border-t border-slate-100 dark:border-slate-800">
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors font-medium"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium"
           >
             <LogOut size={20} />
             <span>Logout</span>

@@ -5,6 +5,8 @@ import { Button } from './Button';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../context/AuthContext';
 
+import { ThemeToggle } from './ThemeToggle';
+
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -31,7 +33,9 @@ export const Navbar = () => {
     <nav
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 lg:px-12 py-4',
-        isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : 'bg-transparent'
+        isScrolled 
+          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm' 
+          : 'bg-transparent'
       )}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -39,7 +43,7 @@ export const Navbar = () => {
           <div className="bg-primary p-2 rounded-lg group-hover:rotate-12 transition-transform">
             <BookOpen className="text-white w-6 h-6" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-slate-900">
+          <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             Edu<span className="text-primary">Flow</span>
           </span>
         </Link>
@@ -52,13 +56,17 @@ export const Navbar = () => {
               to={link.path}
               className={cn(
                 'text-sm font-medium transition-colors hover:text-primary',
-                location.pathname === link.path ? 'text-primary' : 'text-slate-600'
+                location.pathname === link.path 
+                  ? 'text-primary' 
+                  : (isScrolled ? 'text-slate-600 dark:text-slate-300' : 'text-slate-700 dark:text-slate-200')
               )}
             >
               {link.name}
             </Link>
           ))}
-          <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
+          
+          <div className="flex items-center gap-4 pl-4 border-l border-slate-200 dark:border-slate-800">
+            <ThemeToggle />
             {isAuthenticated ? (
               <Link to={role === 'admin' ? '/admin/dashboard' : '/student/dashboard'}>
                 <Button size="sm" className="gap-2">

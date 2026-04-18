@@ -193,8 +193,8 @@ export const AdminStudents = () => {
                 <label className="text-xs font-black uppercase text-slate-400 italic mb-1 block">Batch</label>
                 <select className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" value={formData.batch} onChange={e => setFormData({...formData, batch: e.target.value})}>
                   <option value="">Unassigned</option>
-                  {batches.filter(b => !formData.class || b.class === Number(formData.class)).map(b => (
-                    <option key={b._id} value={b._id}>{b.name}</option>
+                  {batches.map(b => (
+                    <option key={b._id} value={b._id}>{b.name} ({b.class})</option>
                   ))}
                 </select>
               </div>
