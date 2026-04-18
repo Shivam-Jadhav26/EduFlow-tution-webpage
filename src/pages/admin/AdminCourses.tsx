@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { BookOpen, Plus, Search, MoreVertical, Edit2, Trash2, Layers, Tag, Bookmark, Loader2, AlertCircle } from 'lucide-react';
+import { BookOpen, Plus, Search, MoreVertical, Edit2, Trash2, Layers, Tag, Bookmark, Loader2, AlertCircle, UserPlus } from 'lucide-react';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
@@ -8,6 +8,7 @@ import { cn } from '../../utils/cn';
 import api from '../../services/api';
 import { CourseModal } from '../../components/admin/CourseModal';
 import { BatchModal } from '../../components/admin/BatchModal';
+import { QuickAddStudentModal } from '../../components/admin/QuickAddStudentModal';
 
 export const AdminCourses = () => {
   const [courses, setCourses] = useState<any[]>([]);
@@ -20,6 +21,7 @@ export const AdminCourses = () => {
   const [selectedCourse, setSelectedCourse] = useState<any | null>(null);
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [assigningToCourse, setAssigningToCourse] = useState<any | null>(null);
+  const [quickAddCourse, setQuickAddCourse] = useState<any | null>(null);
 
   const fetchCourses = async () => {
     try {
@@ -100,7 +102,7 @@ export const AdminCourses = () => {
           <h1 className="text-2xl font-black text-slate-900 italic">Course Catalog Management</h1>
           <p className="text-slate-500 font-medium italic">Define curriculum, set pricing, and manage subject modules.</p>
         </div>
-        <Button 
+        <Button
           onClick={() => {
             setSelectedCourse(null);
             setIsCourseModalOpen(true);
@@ -112,25 +114,25 @@ export const AdminCourses = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-         {stats.map((stat, i) => (
-            <Card key={i} className="flex items-center gap-4 border-none shadow-sm shadow-slate-200/50">
-               <div className={cn("p-3 rounded-xl bg-slate-50", stat.color)}>
-                  <stat.icon size={24} />
-               </div>
-               <div>
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1 italic">{stat.label}</p>
-                 <p className="text-xl font-black text-slate-900 leading-none">{stat.value}</p>
-               </div>
-            </Card>
-         ))}
+        {stats.map((stat, i) => (
+          <Card key={i} className="flex items-center gap-4 border-none shadow-sm shadow-slate-200/50">
+            <div className={cn("p-3 rounded-xl bg-slate-50", stat.color)}>
+              <stat.icon size={24} />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1 italic">{stat.label}</p>
+              <p className="text-xl font-black text-slate-900 leading-none">{stat.value}</p>
+            </div>
+          </Card>
+        ))}
       </div>
 
       <div className="flex gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input 
-            type="text" 
-            placeholder="Search courses by title or description..." 
+          <input
+            type="text"
+            placeholder="Search courses by title or description..."
             className="w-full bg-white border border-slate-200 pl-12 pr-4 py-3.5 rounded-2xl text-sm font-bold italic focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -156,105 +158,128 @@ export const AdminCourses = () => {
               className="group bg-white rounded-3xl border border-slate-100 p-4 flex flex-col md:flex-row gap-6 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all"
             >
               <div className="md:w-48 h-48 rounded-2xl overflow-hidden shrink-0 relative bg-slate-100">
-                 <img 
-                    src={course.thumbnail || `https://api.dicebear.com/7.x/shapes/svg?seed=${course.title}`} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                    alt={course.title} 
-                 />
-                 <div className="absolute top-3 left-3">
-                    <Badge variant="primary" className="shadow-lg shadow-black/20 text-[10px]">{course.class} GRADE</Badge>
-                 </div>
+                <img
+                  src={course.thumbnail || `https://api.dicebear.com/7.x/shapes/svg?seed=${course.title}`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  alt={course.title}
+                />
+                <div className="absolute top-3 left-3">
+                  <Badge variant="primary" className="shadow-lg shadow-black/20 text-[10px]">{course.class} GRADE</Badge>
+                </div>
               </div>
 
               <div className="flex-1 flex flex-col pt-2">
                 <div className="flex justify-between items-start mb-2">
-                   <h3 className="text-xl font-black text-slate-900 italic leading-tight group-hover:text-primary transition-colors">{course.title}</h3>
-                   <button className="p-2 text-slate-300 hover:text-slate-900 transition-colors">
-                      <MoreVertical size={20} />
-                   </button>
+                  <h3 className="text-xl font-black text-slate-900 italic leading-tight group-hover:text-primary transition-colors">{course.title}</h3>
+                  <button className="p-2 text-slate-300 hover:text-slate-900 transition-colors">
+                    <MoreVertical size={20} />
+                  </button>
                 </div>
                 <p className="text-sm font-medium text-slate-500 italic mb-4 line-clamp-2">"{course.description}"</p>
-                
+
                 <div className="flex flex-wrap gap-2 mb-6">
-                   {(course.subjects || []).map((sub: string) => (
-                     <span key={sub} className="text-[10px] font-bold italic text-slate-400 uppercase tracking-widest border border-slate-100 px-2 py-1 rounded-lg">
-                        {sub}
-                     </span>
-                   ))}
+                  {(course.subjects || []).map((sub: string) => (
+                    <span key={sub} className="text-[10px] font-bold italic text-slate-400 uppercase tracking-widest border border-slate-100 px-2 py-1 rounded-lg">
+                      {sub}
+                    </span>
+                  ))}
                 </div>
 
                 <div className="mt-auto flex items-center justify-between gap-4">
-                   <div className="flex -space-x-2">
-                      {[
-                        { name: 'Dr. Vivek' },
-                        { name: 'Ms. Sonia' },
-                      ].map((instructor, i) => (
-                        <img 
-                          key={i} 
-                          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${instructor.name}`} 
-                          className="w-7 h-7 rounded-full border-2 border-white bg-slate-100 shadow-sm" 
-                          alt={instructor.name}
-                        />
-                      ))}
-                      <div className="w-7 h-7 rounded-full bg-slate-50 border-2 border-white flex items-center justify-center text-[8px] font-black italic text-slate-500">+1</div>
-                   </div>
-                   
-                   <div className="flex gap-2">
+                  <div className="flex -space-x-2">
+                    {[
+                      { name: 'Dr. Vivek' },
+                      { name: 'Ms. Sonia' },
+                    ].map((instructor, i) => (
+                      <img
+                        key={i}
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${instructor.name}`}
+                        className="w-7 h-7 rounded-full border-2 border-white bg-slate-100 shadow-sm"
+                        alt={instructor.name}
+                      />
+                    ))}
+                    <div className="w-7 h-7 rounded-full bg-slate-50 border-2 border-white flex items-center justify-center text-[8px] font-black italic text-slate-500">+1</div>
+                  </div>
+
+                  <div className="flex gap-2">
                      <Button 
                         onClick={() => {
-                          setSelectedCourse(course);
-                          setIsCourseModalOpen(true);
+                          setQuickAddCourse(course);
                         }}
                         variant="outline" 
-                        className="h-9 w-9 p-0 rounded-xl text-slate-400 hover:text-primary hover:border-primary/20 transition-colors"
+                        className="h-9 w-9 p-0 rounded-xl text-emerald-500 hover:text-white hover:bg-emerald-500 hover:border-emerald-500 transition-colors bg-emerald-50/50 border-emerald-100"
+                        title="Add Student to Course"
                       >
-                        <Edit2 size={16} />
+                        <UserPlus size={16} />
                      </Button>
-                     <Button 
-                        onClick={() => handleDeleteCourse(course._id)}
-                        variant="outline" 
-                        className="h-9 w-9 p-0 rounded-xl text-slate-400 hover:text-red-500 hover:border-red-500/20 transition-colors"
-                      >
-                        <Trash2 size={16} />
-                     </Button>
-                     <Button 
-                        onClick={() => {
-                          setAssigningToCourse(course);
-                          setIsBatchModalOpen(true);
-                        }}
-                        variant="secondary" 
-                        className="h-9 text-[10px] font-black italic uppercase tracking-widest px-6 rounded-xl"
-                      >
-                        Batch Assign
-                      </Button>
-                   </div>
+                    <Button
+                      onClick={() => {
+                        setSelectedCourse(course);
+                        setIsCourseModalOpen(true);
+                      }}
+                      variant="outline"
+                      className="h-9 w-9 p-0 rounded-xl text-slate-400 hover:text-primary hover:border-primary/20 transition-colors"
+                    >
+                      <Edit2 size={16} />
+                    </Button>
+                    <Button
+                      onClick={() => handleDeleteCourse(course._id)}
+                      variant="outline"
+                      className="h-9 w-9 p-0 rounded-xl text-slate-400 hover:text-red-500 hover:border-red-500/20 transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setAssigningToCourse(course);
+                        setIsBatchModalOpen(true);
+                      }}
+                      variant="secondary"
+                      className="h-9 text-[10px] font-black italic uppercase tracking-widest px-6 rounded-xl"
+                    >
+                      Batch Assign
+                    </Button>
+                  </div>
                 </div>
               </div>
             </motion.div>
           ))}
           {courses.length === 0 && !loading && (
             <div className="col-span-full py-20 text-center bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-               <BookOpen size={48} className="mx-auto text-slate-200 mb-4" />
-               <p className="text-slate-500 font-black italic">No courses found matching your search.</p>
-               <Button variant="secondary" className="mt-4" onClick={() => setSearchTerm('')}>Browse All</Button>
+              <BookOpen size={48} className="mx-auto text-slate-200 mb-4" />
+              <p className="text-slate-500 font-black italic">No courses found matching your search.</p>
+              <Button variant="secondary" className="mt-4" onClick={() => setSearchTerm('')}>Browse All</Button>
             </div>
           )}
         </div>
       )}
 
       {/* Modals from HEAD */}
-      <CourseModal 
+      <CourseModal
         isOpen={isCourseModalOpen}
         onClose={() => setIsCourseModalOpen(false)}
         initialData={selectedCourse}
         onSubmit={selectedCourse ? handleUpdateCourse : handleCreateCourse}
       />
 
-      <BatchModal 
+      <BatchModal
         isOpen={isBatchModalOpen}
         onClose={() => setIsBatchModalOpen(false)}
         initialData={assigningToCourse ? { class: assigningToCourse.class } : null}
         onSubmit={handleBatchAssignSubmit}
+      />
+
+      <QuickAddStudentModal
+        isOpen={!!quickAddCourse}
+        onClose={() => setQuickAddCourse(null)}
+        targetId={quickAddCourse?._id || quickAddCourse?.id}
+        targetName={quickAddCourse?.title}
+        targetClass={quickAddCourse?.class}
+        targetType="course"
+        onSuccess={() => {
+          fetchCourses();
+          setQuickAddCourse(null);
+        }}
       />
     </div>
   );
