@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Users, Layers, ClipboardList, CreditCard, 
   MessageSquare, TrendingUp, UserPlus, FilePlus, 
@@ -19,6 +20,7 @@ import api from '../../services/api';
 const COLORS = ['#0d9488', '#0891b2', '#2563eb', '#4f46e5', '#7c3aed'];
 
 export const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,12 +65,12 @@ export const AdminDashboard = () => {
   const kpis = [
     { label: 'Total Students', val: data.kpis.totalStudents.toString(), change: data.kpis.studentChange, up: data.kpis.studentChange?.startsWith('+'), icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
     { label: 'Total Batches', val: data.kpis.totalBatches.toString(), change: 'Stable', up: true, icon: Layers, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Pending Fees', val: data.kpis.pendingFees, change: data.kpis.feeChange, up: !data.kpis.feeChange?.startsWith('+'), icon: CreditCard, color: 'text-red-600', bg: 'bg-red-50' },
+    { label: 'Pending Fees', val: data.kpis.pendingFees, change: data.kpis.feeChange, up: !data.kpis.feeChange?.startsWith('-'), icon: CreditCard, color: 'text-red-600', bg: 'bg-red-50' },
     { label: 'Today Attendance', val: data.kpis.todayAttendance, change: data.kpis.attendanceChange, up: data.kpis.attendanceChange?.startsWith('+'), icon: ClipboardList, color: 'text-emerald-600', bg: 'bg-emerald-50' },
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -76,10 +78,10 @@ export const AdminDashboard = () => {
           <p className="text-slate-500 font-medium">Monitoring growth, engagement, and operational efficiency.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2 font-bold border-slate-200">
+          <Button variant="outline" className="gap-2 font-bold border-slate-200" onClick={() => navigate('/admin/attendance')}>
             <Calendar size={18} /> Schedule
           </Button>
-          <Button className="gap-2 font-bold shadow-lg shadow-primary/20">
+          <Button className="gap-2 font-bold shadow-lg shadow-primary/20" onClick={() => navigate('/admin/students')}>
             <UserPlus size={18} /> Add Student
           </Button>
         </div>
@@ -97,7 +99,7 @@ export const AdminDashboard = () => {
                 {kpi.change && (
                   <div className={cn(
                     "flex items-center gap-1 text-xs font-bold",
-                    kpi.up ? "text-emerald-600" : "text-red-600"
+                    kpi.up ? "text-emerald-600" : "text-amber-500"
                   )}>
                     {kpi.up ? <ArrowUpRight size={14} /> : <TrendingDown size={14} />}
                     {kpi.change}
@@ -177,7 +179,7 @@ export const AdminDashboard = () => {
         <Card className="lg:col-span-1" title="Unresolved Doubts" description="Latest student queries awaiting reply">
           <div className="space-y-4">
             {(data.unresolvedDoubts || []).map((doubt: any, i: number) => (
-              <div key={i} className="p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-primary/20 transition-all cursor-pointer">
+              <div key={i} onClick={() => navigate('/admin/doubts')} className="p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-primary/20 transition-all cursor-pointer group">
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="text-sm font-bold text-slate-900 italic">{doubt.student}</h4>
                   <span className="text-[10px] font-medium text-slate-400">{doubt.time}</span>
@@ -185,7 +187,7 @@ export const AdminDashboard = () => {
                 <p className="text-xs text-slate-600 italic mb-3 line-clamp-1">"{doubt.query}"</p>
                 <div className="flex items-center justify-between">
                   <Badge variant="secondary" className="text-[9px] uppercase">{doubt.subject}</Badge>
-                  <Button variant="ghost" size="sm" className="h-6 text-[10px] font-bold text-primary px-0">Reply Now</Button>
+                  <Button variant="ghost" size="sm" className="h-6 text-[10px] font-bold text-primary px-0 group-hover:scale-105 transition-transform">Reply Now</Button>
                 </div>
               </div>
             ))}
@@ -214,28 +216,28 @@ export const AdminDashboard = () => {
       {/* Quick Actions Panel */}
       <Card title="Quick Actions" description="Fast-track daily operational tasks">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Button variant="outline" className="flex flex-col h-auto py-6 gap-3 rounded-2xl border-dashed border-2 hover:border-primary hover:bg-primary/5 group">
+          <Button variant="outline" onClick={() => navigate('/admin/tests')} className="flex flex-col h-auto py-6 gap-3 rounded-2xl border-dashed border-2 hover:border-primary hover:bg-primary/5 group">
             <div className="bg-primary/10 p-3 rounded-full text-primary group-hover:scale-110 transition-transform"><FilePlus size={24} /></div>
             <div className="text-center">
               <p className="text-sm font-bold text-slate-900 italic">Create Test</p>
               <p className="text-[10px] text-slate-500 font-medium">MCQ/Subjective</p>
             </div>
           </Button>
-          <Button variant="outline" className="flex flex-col h-auto py-6 gap-3 rounded-2xl border-dashed border-2 hover:border-blue-600 hover:bg-blue-50 group">
+          <Button variant="outline" onClick={() => navigate('/admin/notifications')} className="flex flex-col h-auto py-6 gap-3 rounded-2xl border-dashed border-2 hover:border-blue-600 hover:bg-blue-50 group">
             <div className="bg-blue-100 p-3 rounded-full text-blue-600 group-hover:scale-110 transition-transform"><Send size={24} /></div>
             <div className="text-center">
               <p className="text-sm font-bold text-slate-900 italic">Send Alerts</p>
               <p className="text-[10px] text-slate-500 font-medium">SMS/WhatsApp</p>
             </div>
           </Button>
-          <Button variant="outline" className="flex flex-col h-auto py-6 gap-3 rounded-2xl border-dashed border-2 hover:border-amber-600 hover:bg-amber-50 group">
+          <Button variant="outline" onClick={() => navigate('/admin/attendance')} className="flex flex-col h-auto py-6 gap-3 rounded-2xl border-dashed border-2 hover:border-amber-600 hover:bg-amber-50 group">
             <div className="bg-amber-100 p-3 rounded-full text-amber-600 group-hover:scale-110 transition-transform"><AlertCircle size={24} /></div>
             <div className="text-center">
               <p className="text-sm font-bold text-slate-900 italic">Mark Attendance</p>
               <p className="text-[10px] text-slate-500 font-medium">All Batches</p>
             </div>
           </Button>
-          <Button variant="outline" className="flex flex-col h-auto py-6 gap-3 rounded-2xl border-dashed border-2 hover:border-indigo-600 hover:bg-indigo-50 group">
+          <Button variant="outline" onClick={() => navigate('/admin/batches')} className="flex flex-col h-auto py-6 gap-3 rounded-2xl border-dashed border-2 hover:border-indigo-600 hover:bg-indigo-50 group">
             <div className="bg-indigo-100 p-3 rounded-full text-indigo-600 group-hover:scale-110 transition-transform"><Layers size={24} /></div>
             <div className="text-center">
               <p className="text-sm font-bold text-slate-900 italic">Batch Report</p>

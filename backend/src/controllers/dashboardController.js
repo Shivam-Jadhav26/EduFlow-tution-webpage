@@ -46,13 +46,27 @@ const getAdminDashboard = async (req, res, next) => {
       count: recentEnrollments.find((e) => e._id === parseInt(k))?.count || 0,
     }));
 
+    // Generate dynamic KPI Deltas
+    const latestStudentsCount = recentEnrollments.reduce((sum, e) => sum + e.count, 0);
+    const studentChange = latestStudentsCount > 0 ? `+${latestStudentsCount} this week` : 'Stable';
+    const attendanceChange = todayPct > 50 ? '+ Trending up' : '- Needs attention'; // Simplified metric string
+
     // Fee collections by month (last 4 months)
-    const feeCollections = await FeeRecord.aggregate([
+    const feeCollectionsAgg = await FeeRecord.aggregate([
       { $match: { status: 'paid' } },
       { $group: { _id: '$month', amount: { $sum: '$amount' } } },
       { $sort: { _id: -1 } },
       { $limit: 4 },
     ]);
+    
+    // Convert int-based months to standard short strings
+    const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const feeCollections = feeCollectionsAgg.map(f => ({
+      name: typeof f._id === 'number' && f._id >= 1 && f._id <= 12 ? monthNames[f._id] : f._id,
+      amount: f.amount
+    })).reverse(); // Reverse for chronologically asc graph format
+
+    const feeChange = feeCollections.length > 0 ? `+₹${feeCollections[feeCollections.length - 1].amount.toLocaleString()} received` : 'Waiting';
 
     // Class distribution
     const classDistrib = await User.aggregate([
@@ -71,18 +85,21 @@ const getAdminDashboard = async (req, res, next) => {
       kpis: {
         totalStudents,
         totalBatches,
-        pendingFees: pendingFees[0]?.total || 0,
-        todayAttendancePct: todayPct,
+        pendingFees: `₹${(pendingFees[0]?.total || 0).toLocaleString()}`,
+        todayAttendance: `${todayPct}%`,
         unresolvedDoubts,
+        studentChange,
+        feeChange,
+        attendanceChange
       },
-      enrollmentData,
-      feeCollections: feeCollections.map((f) => ({ month: f._id, amount: f.amount })).reverse(),
+      enrollmentTrend: enrollmentData, // Match frontend expected shape natively
+      feeCollections, 
       classDistribution: classDistrib.map((c) => ({ name: `Class ${c._id}`, value: c.value })),
-      latestDoubts: latestDoubts.map((d) => ({
-        student: d.studentId?.name,
-        subject: d.subject,
-        query: d.question.substring(0, 60) + '...',
-        time: d.createdAt,
+      unresolvedDoubts: latestDoubts.map((d) => ({
+        student: d.studentId?.name || 'Unknown',
+        subject: d.subject || 'General',
+        query: d.question.substring(0, 60) + (d.question.length > 60 ? '...' : ''),
+        time: d.createdAt ? new Date(d.createdAt).toLocaleDateString() : 'Recent',
       })),
     });
   } catch (err) { next(err); }
