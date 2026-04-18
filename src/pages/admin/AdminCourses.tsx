@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { BookOpen, Plus, Search, MoreVertical, Edit2, Trash2, Layers, Tag, Bookmark, Loader2 } from 'lucide-react';
+import { BookOpen, Plus, Search, MoreVertical, Edit2, Trash2, Layers, Tag, Bookmark, Loader2, AlertCircle } from 'lucide-react';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
@@ -15,7 +15,7 @@ export const AdminCourses = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Modal states
+  // Modal states from HEAD
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<any | null>(null);
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
@@ -45,6 +45,7 @@ export const AdminCourses = () => {
     try {
       await api.post('/courses', data);
       fetchCourses();
+      setIsCourseModalOpen(false);
     } catch (err) {
       console.error('Failed to create course:', err);
       alert('Failed to create course.');
@@ -56,6 +57,7 @@ export const AdminCourses = () => {
     try {
       await api.put(`/courses/${selectedCourse._id}`, data);
       fetchCourses();
+      setIsCourseModalOpen(false);
     } catch (err) {
       console.error('Failed to update course:', err);
       alert('Failed to update course.');
@@ -75,9 +77,9 @@ export const AdminCourses = () => {
 
   const handleBatchAssignSubmit = async (data: any) => {
     try {
-      // Create a new batch for this class
       await api.post('/batches', data);
       alert('Batch created and assigned to this class successfully!');
+      setIsBatchModalOpen(false);
     } catch (err) {
       console.error('Failed to assign batch:', err);
       alert('Failed to assign batch.');
@@ -160,7 +162,7 @@ export const AdminCourses = () => {
                     alt={course.title} 
                  />
                  <div className="absolute top-3 left-3">
-                    <Badge variant="primary" className="shadow-lg shadow-black/20">{course.class} GRADE</Badge>
+                    <Badge variant="primary" className="shadow-lg shadow-black/20 text-[10px]">{course.class} GRADE</Badge>
                  </div>
               </div>
 
@@ -240,7 +242,7 @@ export const AdminCourses = () => {
         </div>
       )}
 
-      {/* Modals */}
+      {/* Modals from HEAD */}
       <CourseModal 
         isOpen={isCourseModalOpen}
         onClose={() => setIsCourseModalOpen(false)}

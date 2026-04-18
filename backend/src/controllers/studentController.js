@@ -67,7 +67,7 @@ const getStudent = async (req, res, next) => {
 // POST /api/students — Admin creates student
 const createStudent = async (req, res, next) => {
   try {
-    const { name, email, password, class: studentClass, batch, phone, parentName, parentPhone, status } = req.body;
+    const { name, email, password, gender, class: studentClass, batch, phone, parentName, parentPhone, status } = req.body;
     if (!name || !email || !password) {
       return sendError(res, 'Name, email, and password are required.', 400);
     }
@@ -76,7 +76,7 @@ const createStudent = async (req, res, next) => {
 
     const student = await User.create({
       name, email, passwordHash: password,
-      role: 'student', class: studentClass, batch,
+      gender, role: 'student', class: studentClass, batch,
       phone, parentName, parentPhone, status: status || 'active',
     });
     return sendSuccess(res, { student: student.toPublic() }, 'Student created successfully.', 201);
@@ -88,10 +88,10 @@ const createStudent = async (req, res, next) => {
 // PUT /api/students/:id
 const updateStudent = async (req, res, next) => {
   try {
-    const { name, email, class: studentClass, batch, phone, parentName, parentPhone, status, avatar } = req.body;
+    const { name, email, gender, class: studentClass, batch, phone, parentName, parentPhone, status, avatar } = req.body;
     const student = await User.findByIdAndUpdate(
       req.params.id,
-      { name, email, class: studentClass, batch, phone, parentName, parentPhone, status, avatar },
+      { name, email, gender, class: studentClass, batch, phone, parentName, parentPhone, status, avatar },
       { new: true, runValidators: true }
     ).populate('batch', 'name class');
 

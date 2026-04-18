@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     },
     passwordHash: { type: String, required: true, select: false },
     role: { type: String, enum: ['student', 'admin'], default: 'student' },
+    gender: { type: String, enum: ['male', 'female', 'other'], default: 'other' },
     class: { type: String, default: null },
     batch: { type: mongoose.Schema.Types.ObjectId, ref: 'Batch', default: null },
     phone: { type: String, default: null },

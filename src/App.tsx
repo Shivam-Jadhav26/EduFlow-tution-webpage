@@ -89,7 +89,6 @@ export default function App() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="students" element={<AdminStudents />} />
               <Route path="batches" element={<AdminBatches />} />
-              <Route path="batches/:id" element={<Placeholder name="Manage Roster & Attendance" />} />
               <Route path="courses" element={<AdminCourses />} />
               <Route path="timetable" element={<AdminTimetable />} />
               <Route path="attendance" element={<AdminAttendance />} />

@@ -3,6 +3,32 @@ const TestAttempt = require('../models/TestAttempt');
 const User = require('../models/User');
 const { sendSuccess, sendError } = require('../utils/response');
 
+// GET /api/tests/dashboard
+const getTestDashboardStats = async (req, res, next) => {
+  try {
+    const totalPublished = await Test.countDocuments({ status: { $ne: 'draft' } });
+    const evaluationPending = await Test.countDocuments({ status: 'draft' });
+    const totalSubmissions = await TestAttempt.countDocuments({ status: 'submitted' });
+
+    return sendSuccess(res, {
+      totalPublished,
+      evaluationPending,
+      totalSubmissions,
+    });
+  } catch (err) { next(err); }
+};
+
+// GET /api/tests/:id/submissions
+const getTestSubmissions = async (req, res, next) => {
+  try {
+    const submissions = await TestAttempt.find({ testId: req.params.id })
+      .populate('studentId', 'name email class')
+      .sort({ submittedAt: -1 });
+    
+    return sendSuccess(res, { submissions });
+  } catch (err) { next(err); }
+};
+
 // GET /api/tests
 const getTests = async (req, res, next) => {
   try {
@@ -135,4 +161,4 @@ const submitTest = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { getTests, getTest, createTest, updateTest, deleteTest, submitTest };
+module.exports = { getTests, getTest, createTest, updateTest, deleteTest, submitTest, getTestDashboardStats, getTestSubmissions };

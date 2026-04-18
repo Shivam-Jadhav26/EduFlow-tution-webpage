@@ -1,6 +1,83 @@
 const Attendance = require('../models/Attendance');
 const User = require('../models/User');
+const Batch = require('../models/Batch');
 const { sendSuccess, sendError } = require('../utils/response');
+
+// GET /api/attendance/dashboard
+const getAdminDashboardStats = async (req, res, next) => {
+  try {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const today = new Date(todayStr);
+    const tomorrow = new Date(today.getTime() + 86400000);
+
+    const todayRecords = await Attendance.find({ date: { $gte: today, $lt: tomorrow } }).populate('batchId');
+    const absentCount = todayRecords.filter(r => r.status === 'absent').length;
+    const lateCount = todayRecords.filter(r => r.status === 'late').length;
+    const presentCount = todayRecords.filter(r => r.status === 'present').length;
+    
+    const totalStudents = await User.countDocuments({ role: 'student', status: 'active' });
+    const todayPresence = totalStudents > 0 ? Math.round(((presentCount + lateCount) / totalStudents) * 100) : 0;
+    
+    const todayStats = {
+      presence: todayPresence + '%',
+      unexcused: absentCount,
+      late: lateCount,
+      auditsPending: 0
+    };
+
+    const batches = await Batch.find({});
+    const dailySummary = [];
+    let pendingAudits = 0;
+    
+    for (const b of batches) {
+      const bRecords = todayRecords.filter(r => r.batchId && r.batchId._id.toString() === b._id.toString());
+      if (bRecords.length === 0) pendingAudits++;
+      
+      dailySummary.push({
+        _id: b._id,
+        batch: b.name,
+        class: b.class || 'N/A',
+        present: bRecords.filter(r => r.status === 'present').length,
+        absent: bRecords.filter(r => r.status === 'absent').length,
+        late: bRecords.filter(r => r.status === 'late').length
+      });
+    }
+    todayStats.auditsPending = pendingAudits;
+
+    const lowAttendanceAgg = await Attendance.aggregate([
+      {
+        $group: {
+          _id: '$studentId',
+          total: { $sum: 1 },
+          attended: { $sum: { $cond: [{ $in: ['$status', ['present', 'late']] }, 1, 0] } }
+        }
+      },
+      {
+        $project: {
+          rate: { $multiply: [{ $divide: ['$attended', { $max: ['$total', 1] }] }, 100] }
+        }
+      },
+      { $match: { rate: { $lt: 75 } } }
+    ]);
+
+    const lowAttendanceStudentIds = lowAttendanceAgg.map(a => a._id);
+    const studentsRaw = await User.find({ _id: { $in: lowAttendanceStudentIds } }).populate('batch', 'name');
+    
+    const lowAttendanceStudents = studentsRaw.map(s => {
+      const agg = lowAttendanceAgg.find(a => a._id.toString() === s._id.toString());
+      const rateStr = Math.round(agg.rate) + '%';
+      return {
+        id: s._id,
+        name: s.name,
+        class: s.batch?.name || s.class || 'N/A',
+        rate: rateStr,
+        status: agg.rate < 60 ? 'Critical' : 'Warning'
+      };
+    });
+
+    return sendSuccess(res, { todayStats, dailySummary, lowAttendanceStudents });
+  } catch (err) { next(err); }
+};
 
 // GET /api/attendance — student: own; admin: by batchId+date
 const getAttendance = async (req, res, next) => {
@@ -88,8 +165,8 @@ const getBatchStats = async (req, res, next) => {
   try {
     const { batchId } = req.query;
     if (!batchId) return sendError(res, 'batchId is required.', 400);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayStr = new Date().toISOString().split('T')[0];
+    const today = new Date(todayStr);
     const tomorrow = new Date(today.getTime() + 86400000);
 
     const [todayRecords, allStudents] = await Promise.all([
@@ -104,4 +181,4 @@ const getBatchStats = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { getAttendance, getMyStats, markAttendance, getBatchStats };
+module.exports = { getAttendance, getMyStats, markAttendance, getBatchStats, getAdminDashboardStats };

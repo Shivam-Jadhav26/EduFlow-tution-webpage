@@ -14,7 +14,7 @@ const getTimetable = async (req, res, next) => {
     const query = {};
     if (batchId) query.batchId = batchId;
 
-    const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const entries = await TimetableEntry.find(query)
       .populate('batchId', 'name class')
       .sort({ day: 1, time: 1 });
@@ -28,11 +28,11 @@ const getTimetable = async (req, res, next) => {
 
 const createEntry = async (req, res, next) => {
   try {
-    const { day, time, subject, teacher, room, batchId } = req.body;
+    const { day, time, subject, teacher, room, batchId, type } = req.body;
     if (!day || !time || !subject || !teacher || !batchId) {
       return sendError(res, 'Day, time, subject, teacher, and batchId are required.', 400);
     }
-    const entry = await TimetableEntry.create({ day, time, subject, teacher, room, batchId });
+    const entry = await TimetableEntry.create({ day, time, subject, teacher, room, batchId, type: type || 'class' });
     return sendSuccess(res, { entry }, 'Timetable entry created.', 201);
   } catch (err) { next(err); }
 };

@@ -28,7 +28,7 @@ export const AdminFees = () => {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [showDateFilters, setShowDateFilters] = useState(false);
   
-  // Modal states
+  // Modal states from HEAD
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFee, setSelectedFee] = useState<any | null>(null);
 
@@ -62,12 +62,14 @@ export const AdminFees = () => {
   const handleCreateFee = async (data: any) => {
     await api.post('/fees', data);
     fetchData();
+    setIsModalOpen(false);
   };
 
   const handleUpdateFee = async (data: any) => {
     if (!selectedFee?._id) return;
     await api.put(`/fees/${selectedFee._id}`, data);
     fetchData();
+    setIsModalOpen(false);
   };
 
   const handleDeleteFee = async (id: string) => {
@@ -115,7 +117,7 @@ export const AdminFees = () => {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase">Fee Management Bureau</h1>
@@ -147,7 +149,7 @@ export const AdminFees = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((stat, i) => (
-          <Card key={i} className="flex flex-col justify-center border-none shadow-sm shadow-slate-200/50">
+          <Card key={i} className="flex flex-col justify-center border-none shadow-sm shadow-slate-200/50 hover:shadow-md transition-shadow">
              <div className={cn("p-4 rounded-2xl bg-slate-50 w-fit mb-4", stat.color)}>
                 <stat.icon size={24} />
              </div>
@@ -254,7 +256,7 @@ export const AdminFees = () => {
                   <tbody>
                      {transactions.map((tx) => (
                         <tr key={tx._id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors group">
-                           <td className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
+                           <td className="py-4 px-4">
                               <div className="flex items-center gap-3">
                                  <div className="p-2 bg-slate-100 rounded-lg text-slate-500 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                     <LayoutGrid size={14} />
@@ -262,14 +264,14 @@ export const AdminFees = () => {
                                  <span className="text-sm font-black text-slate-900 italic">{tx.transactionId || `TXN-${tx._id.slice(-6).toUpperCase()}`}</span>
                               </div>
                            </td>
-                           <td className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
+                           <td className="py-4 px-4">
                               <h4 className="text-sm font-black text-slate-900 italic leading-none mb-1">{tx.studentId?.name || 'Unknown Student'}</h4>
                               <p className="text-[10px] font-bold text-slate-400 italic">Class: {tx.studentId?.class || 'N/A'}</p>
                            </td>
-                           <td className="py-4 px-4 text-xs font-bold text-slate-500 italic" onClick={(e) => e.stopPropagation()}>{tx.month}</td>
-                           <td className="py-4 px-4 text-sm font-black text-slate-900 italic" onClick={(e) => e.stopPropagation()}>₹{tx.amount.toLocaleString()}</td>
-                           <td className="py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest" onClick={(e) => e.stopPropagation()}>{tx.method || 'N/A'}</td>
-                           <td className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
+                           <td className="py-4 px-4 text-xs font-bold text-slate-500 italic">{tx.month}</td>
+                           <td className="py-4 px-4 text-sm font-black text-slate-900 italic">₹{tx.amount.toLocaleString()}</td>
+                           <td className="py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{tx.method || 'N/A'}</td>
+                           <td className="py-4 px-4">
                               <Badge variant={tx.status === 'paid' ? 'success' : tx.status === 'pending' ? 'warning' : 'error'}>
                                  {tx.status.toUpperCase()}
                               </Badge>

@@ -12,47 +12,15 @@ const getMyFees = async (req, res, next) => {
 // GET /api/fees — admin: all fee records with filters
 const getAllFees = async (req, res, next) => {
   try {
-    const { status, month, search, startDate, endDate } = req.query;
     const query = {};
-
-    if (status) query.status = status;
-    if (month) query.month = { $regex: month, $options: 'i' };
-
-    // Date range filter (on createdAt or dueDate? User said "Date Range")
-    // Let's use dueDate for the filter as it's more relevant for fees
-    if (startDate || endDate) {
-      query.dueDate = {};
-      if (startDate) query.dueDate.$gte = new Date(startDate);
-      if (endDate) query.dueDate.$lte = new Date(endDate);
-    }
-
-    // Search filter (Transaction ID)
-    if (search) {
-      query.$or = [
-        { transactionId: { $regex: search, $options: 'i' } },
-        { month: { $regex: search, $options: 'i' } }
-      ];
-    }
+    if (req.query.studentId) query.studentId = req.query.studentId;
+    if (req.query.status) query.status = req.query.status;
+    if (req.query.month) query.month = { $regex: req.query.month, $options: 'i' };
 
     const fees = await FeeRecord.find(query)
       .populate('studentId', 'name email class')
       .sort({ createdAt: -1 });
-
-    // If there's a search term and we want to search student names too, 
-    // we filter after population if the dataset is small, or use aggregate for large datasets.
-    // For now, let's keep it simple: if search exists, it filters what it can.
-    let filteredFees = fees;
-    if (search) {
-      const lowerSearch = search.toLowerCase();
-      filteredFees = fees.filter(f => 
-        f.transactionId?.toLowerCase().includes(lowerSearch) ||
-        f.month?.toLowerCase().includes(lowerSearch) ||
-        f.studentId?.name?.toLowerCase().includes(lowerSearch) ||
-        f.studentId?.email?.toLowerCase().includes(lowerSearch)
-      );
-    }
-
-    return sendSuccess(res, { fees: filteredFees });
+    return sendSuccess(res, { fees });
   } catch (err) { next(err); }
 };
 
@@ -114,13 +82,4 @@ const updateFee = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-// DELETE /api/fees/:id — admin deletes fee record
-const deleteFee = async (req, res, next) => {
-  try {
-    const fee = await FeeRecord.findByIdAndDelete(req.params.id);
-    if (!fee) return sendError(res, 'Fee record not found.', 404);
-    return sendSuccess(res, null, 'Fee record deleted.');
-  } catch (err) { next(err); }
-};
-
-module.exports = { getMyFees, getAllFees, getFeeStats, createFee, updateFee, deleteFee };
+module.exports = { getMyFees, getAllFees, getFeeStats, createFee, updateFee };

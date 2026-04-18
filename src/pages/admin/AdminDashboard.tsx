@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import {
-  Users, Layers, ClipboardList, CreditCard,
-  MessageSquare, TrendingUp, UserPlus, FilePlus,
+import { 
+  Users, Layers, ClipboardList, CreditCard, 
+  MessageSquare, TrendingUp, UserPlus, FilePlus, 
   Send, AlertCircle, Calendar, ArrowUpRight,
   TrendingDown, MoreVertical, Loader2
 } from 'lucide-react';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, LineChart, Line,
   PieChart, Pie, Cell
 } from 'recharts';
@@ -118,11 +118,11 @@ export const AdminDashboard = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.enrollmentTrend}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fontWeight: 600, fill: '#64748b' }}
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 12, fontWeight: 600, fill: '#64748b' }} 
                 />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600, fill: '#64748b' }} />
                 <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '12px', border: 'none' }} />

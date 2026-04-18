@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Users, Filter, Plus, Clock, User, ArrowRight, Layers, MoreVertical, Search, Loader2, GraduationCap, Edit2 } from 'lucide-react';
+import { 
+  Plus, Search, Filter, MoreVertical, 
+  Users, Clock, Layers, GraduationCap,
+  ArrowRight, Edit2, User
+} from 'lucide-react';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
@@ -10,36 +13,28 @@ import api from '../../services/api';
 import { BatchModal } from '../../components/admin/BatchModal';
 
 export const AdminBatches = () => {
-  const navigate = useNavigate();
   const [batches, setBatches] = useState<any[]>([]);
-  const [statsData, setStatsData] = useState<any>({
-    totalActive: 0,
-    classesCovered: 'N/A',
-    peakSlot: 'N/A'
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterClass, setFilterClass] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingBatch, setEditingBatch] = useState<any>(null);
-  const [showMenu, setShowMenu] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [showMenu, setShowMenu] = useState<string | null>(null);
+
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBatch, setEditingBatch] = useState<any | null>(null);
 
   const fetchBatches = async () => {
     try {
       setLoading(true);
-      setError(null);
       const response = await api.get('/batches');
-      setBatches(response.data.data.batches || []);
-      if (response.data.data.stats) {
-        setStatsData(response.data.data.stats);
-      }
+      setBatches(response.data.data.batches);
+      setError(null);
     } catch (err: any) {
       console.error('Failed to fetch batches:', err);
-      setError('Failed to load batches.');
+      setError('Failed to load batches. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -50,58 +45,60 @@ export const AdminBatches = () => {
   }, []);
 
   const handleCreateEdit = async (data: any) => {
-    if (editingBatch) {
-      await api.put(`/batches/${editingBatch._id || editingBatch.id}`, data);
-    } else {
-      await api.post('/batches', data);
+    try {
+      if (editingBatch) {
+        await api.put(`/batches/${editingBatch._id}`, data);
+      } else {
+        await api.post('/batches', data);
+      }
+      fetchBatches();
+      setIsModalOpen(false);
+      setEditingBatch(null);
+    } catch (err) {
+      console.error('Failed to save batch:', err);
+      alert('Failed to save batch.');
     }
-    fetchBatches();
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to archive this batch?')) {
-      try {
-        await api.delete(`/batches/${id}`);
-        fetchBatches();
-      } catch (err) {
-        console.error('Failed to delete batch:', err);
-        alert('Failed to delete batch.');
-      }
+    if (!window.confirm('Are you sure you want to archive this batch?')) return;
+    try {
+      await api.delete(`/batches/${id}`);
+      fetchBatches();
+      setShowMenu(null);
+    } catch (err) {
+      console.error('Failed to delete batch:', err);
+      alert('Failed to archive batch.');
     }
   };
 
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setShowMenu(null);
-      setShowFilters(false);
-    };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
-
-  const filteredBatches = batches.filter(b => {
-    const safeName = b.name || '';
-    const safeClass = b.class || '';
-    const matchesSearch = safeName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          safeClass.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesClass = filterClass ? b.class === filterClass : true;
-    const matchesStatus = filterStatus ? (b.status === filterStatus || (b.isActive && filterStatus === 'ACTIVE') || (!b.isActive && filterStatus === 'INACTIVE')) : true;
+  const filteredBatches = batches.filter(batch => {
+    const matchesSearch = batch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         batch.class.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesClass = !filterClass || batch.class === filterClass;
+    const matchesStatus = !filterStatus || batch.status === filterStatus;
     return matchesSearch && matchesClass && matchesStatus;
   });
 
-  const availableClasses = [...new Set(batches.map(b => b.class))].filter(Boolean).sort();
+  const statsData = {
+    totalActive: batches.filter(b => b.status === 'ACTIVE').length,
+    classesCovered: [...new Set(batches.map(b => b.class))].length > 0 
+                    ? `${Math.min(...batches.map(b => parseInt(b.class) || 0))}-${Math.max(...batches.map(b => parseInt(b.class) || 0))}th`
+                    : 'N/A',
+    peakSlot: '04:00 PM'
+  };
 
-  if (loading && batches.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-24 text-slate-400">
-        <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
-        <p className="font-bold italic">Loading batches...</p>
-      </div>
-    );
-  }
+  const availableClasses = [...new Set(batches.map(b => b.class))].sort();
+
+  const getStatusColor = (batch: any) => {
+    const strength = batch.students?.length || 0;
+    if (strength >= 50) return 'bg-red-500';
+    if (strength >= 30) return 'bg-amber-500';
+    return 'bg-emerald-500';
+  };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500" onClick={() => setShowMenu(null)}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-900 italic tracking-tight">Batches Management</h1>
@@ -127,13 +124,14 @@ export const AdminBatches = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { icon: Users, label: 'Total Active Batches', value: statsData.totalActive.toString(), color: 'text-primary', bg: 'bg-primary/5' },
-          { icon: Layers, label: 'Classes Covered', value: statsData.classesCovered, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+          { icon: Users, label: 'Total Active', value: statsData.totalActive.toString(), color: 'text-primary', bg: 'bg-primary/5' },
+          { icon: Layers, label: 'Classes', value: statsData.classesCovered, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+          { icon: User, label: 'Enrollments', value: batches.reduce((acc, b) => acc + (b.students?.length || 0), 0).toString(), color: 'text-emerald-600', bg: 'bg-emerald-50' },
           { icon: Clock, label: 'Peak Slot', value: statsData.peakSlot, color: 'text-amber-600', bg: 'bg-amber-50' },
         ].map((stat, i) => (
-          <Card key={i} className="text-center p-6 border-none shadow-slate-200/50">
+          <Card key={i} className="text-center p-6 border-none shadow-md shadow-slate-200/50 hover:shadow-lg transition-all">
             <div className={cn("inline-flex p-3 rounded-2xl mb-4", stat.bg, stat.color)}>
               <stat.icon size={24} />
             </div>
@@ -163,7 +161,7 @@ export const AdminBatches = () => {
             <Filter size={18} /> Filters
           </Button>
           {showFilters && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-xl z-20 p-2" onClick={e => e.stopPropagation()}>
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-xl z-30 p-2" onClick={e => e.stopPropagation()}>
               <div className="p-2 space-y-4">
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-500 uppercase italic">Filter by Class</label>
@@ -207,7 +205,7 @@ export const AdminBatches = () => {
               <div className="flex justify-between items-start mb-6">
                 <div className="space-y-1">
                   <Badge variant="outline" className="italic">{batch.class}</Badge>
-                  <h3 className="text-xl font-black text-slate-900 italic leading-tight group-hover:text-primary transition-colors">{batch.name}</h3>
+                  <h3 className="text-xl font-black text-slate-900 italic leading-tight group-hover:text-primary transition-colors line-clamp-1">{batch.name}</h3>
                 </div>
                 <div className="relative">
                   <button 
@@ -240,18 +238,27 @@ export const AdminBatches = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="space-y-2 pt-2">
-                  <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 italic">
-                    <Clock size={12} className="text-slate-400 shrink-0" />
-                    <span className="truncate">{batch.timing || 'Schedule not set'}</span>
+                {/* Enrollment Progress Bar (from friend's version) */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px] font-black italic">
+                    <span className="text-slate-400 uppercase tracking-widest">Enrollment</span>
+                    <span className="text-slate-900">{batch.students?.length || 0}/60 Students</span>
                   </div>
-                  {batch.teacher && (
-                    <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 italic">
-                      <GraduationCap size={12} className="text-slate-400 shrink-0" />
-                      <span className="truncate">{batch.teacher}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 pt-1">
+                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(((batch.students?.length || 0) / 60) * 100, 100)}%` }}
+                      className={cn("h-full rounded-full transition-all", getStatusColor(batch))}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 italic">
+                    <Clock size={12} className="text-slate-400 shrink-0" />
+                    <span className="truncate">{batch.timing ? batch.timing.split(' - ')[0] : 'No Time'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <span className={cn(
                       "inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full",
                       batch.status === 'ACTIVE'
@@ -266,6 +273,13 @@ export const AdminBatches = () => {
                     </span>
                   </div>
                 </div>
+
+                {batch.teacher && (
+                  <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 italic pt-1 border-t border-slate-50">
+                    <GraduationCap size={12} className="text-slate-400 shrink-0" />
+                    <span className="truncate">{batch.teacher}</span>
+                  </div>
+                )}
               </div>
             </div>
 

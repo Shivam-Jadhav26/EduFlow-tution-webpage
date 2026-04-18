@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Plus, Trash2, Save, Send, AlertCircle, 
-  ChevronLeft, Layout, Settings, BrainCircuit,
-  PlusCircle, MinusCircle, GripVertical
+  ChevronLeft, Settings, BrainCircuit,
+  PlusCircle, Loader2
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -10,15 +10,59 @@ import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Badge } from '../../components/common/Badge';
+import { cn } from '../../utils/cn';
+import api from '../../services/api';
 
 export const AdminCreateTest = () => {
   const navigate = useNavigate();
+  
+  const [batches, setBatches] = useState<any[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [loadingBatches, setLoadingBatches] = useState(true);
+
+  // Form State
+  const [formData, setFormData] = useState({
+    title: '',
+    subject: 'Mathematics',
+    date: new Date().toISOString().split('T')[0],
+    time: '10:00',
+    duration: 60,
+    totalMarks: 50,
+    class: '10',
+    targetBatches: [] as string[]
+  });
+
   const [questions, setQuestions] = useState([
-    { id: 1, text: '', options: ['', '', '', ''], correct: 0 },
+    { id: Date.now(), text: '', options: ['', '', '', ''], correctAnswer: 0 },
   ]);
 
+  useEffect(() => {
+    const fetchBatches = async () => {
+      try {
+        const res = await api.get('/batches');
+        setBatches(res.data.data.batches || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingBatches(false);
+      }
+    };
+    fetchBatches();
+  }, []);
+
+  const handleChange = (field: string, value: any) => setFormData(p => ({ ...p, [field]: value }));
+
+  const toggleBatch = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      targetBatches: prev.targetBatches.includes(id) 
+        ? prev.targetBatches.filter(b => b !== id)
+        : [...prev.targetBatches, id]
+    }));
+  };
+
   const addQuestion = () => {
-    setQuestions([...questions, { id: Date.now(), text: '', options: ['', '', '', ''], correct: 0 }]);
+    setQuestions([...questions, { id: Date.now(), text: '', options: ['', '', '', ''], correctAnswer: 0 }]);
   };
 
   const removeQuestion = (id: number) => {
@@ -27,10 +71,78 @@ export const AdminCreateTest = () => {
     }
   };
 
+  const updateQuestionText = (id: number, text: string) => {
+    setQuestions(questions.map(q => q.id === id ? { ...q, text } : q));
+  };
+  
+  const updateOption = (qId: number, oIdx: number, val: string) => {
+    setQuestions(questions.map(q => {
+      if (q.id === qId) {
+        const newOpts = [...q.options];
+        newOpts[oIdx] = val;
+        return { ...q, options: newOpts };
+      }
+      return q;
+    }));
+  };
+  
+  const updateCorrectAnswer = (qId: number, oIdx: number) => {
+    setQuestions(questions.map(q => q.id === qId ? { ...q, correctAnswer: oIdx } : q));
+  };
+
+  const handleSmartGenerate = () => {
+    const newQs = [
+      { id: Date.now() + 1, text: "What is the degree of the polynomial 4x^3 + 2x^2 - x + 5?", options: ["1", "2", "3", "4"], correctAnswer: 2 },
+      { id: Date.now() + 2, text: "Factorize: x^2 - 5x + 6", options: ["(x-2)(x-3)", "(x+2)(x+3)", "(x-1)(x-6)", "(x+1)(x-6)"], correctAnswer: 0 },
+      { id: Date.now() + 3, text: "The roots of the equation x^2 - 4 = 0 are:", options: ["2, -2", "4, -4", "0, 4", "Only 2"], correctAnswer: 0 },
+      { id: Date.now() + 4, text: "If the discriminant of a quadratic equation is zero, the roots are:", options: ["Real and distinct", "Real and equal", "Complex and distinct", "None of the above"], correctAnswer: 1 },
+      { id: Date.now() + 5, text: "What is the sum of the roots of the equation 2x^2 - 8x + 6 = 0?", options: ["2", "4", "3", "-4"], correctAnswer: 1 },
+    ];
+    setQuestions(prev => prev[0].text === '' ? newQs : [...prev, ...newQs]);
+  };
+
+  const handleSave = async (status: 'draft' | 'upcoming') => {
+    try {
+      if (!formData.title || !formData.subject) {
+         return alert("Please fill title and subject fields.");
+      }
+      
+      const incompleteQ = questions.find(q => !q.text || q.options.some(o => !o));
+      if (incompleteQ) {
+         if(!window.confirm("Some questions or options are entirely empty. Proceed anyway?")) return;
+      }
+
+      setSaving(true);
+      const finalDate = new Date(`${formData.date}T${formData.time}`).toISOString();
+      const payload = {
+        title: formData.title,
+        subject: formData.subject,
+        date: finalDate,
+        duration: Number(formData.duration),
+        totalMarks: Number(formData.totalMarks),
+        class: formData.class,
+        targetBatches: formData.targetBatches,
+        questions: questions.map(q => ({
+          text: q.text,
+          options: q.options,
+          correctAnswer: q.correctAnswer
+        })),
+        status
+      };
+      
+      await api.post('/tests', payload);
+      navigate('/admin/tests');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to save test');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link to="/admin/tests">
             <Button variant="ghost" size="icon" className="rounded-xl"><ChevronLeft size={24} /></Button>
@@ -41,11 +153,11 @@ export const AdminCreateTest = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2 font-bold border-slate-200">
-            <Save size={18} /> Save as Draft
+          <Button variant="outline" className="gap-2 font-bold border-slate-200" onClick={() => handleSave('draft')} disabled={saving}>
+            {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save as Draft
           </Button>
-          <Button className="gap-2 font-bold shadow-lg shadow-primary/20" onClick={() => navigate('/admin/tests')}>
-            <Send size={18} /> Publish Test
+          <Button className="gap-2 font-bold shadow-lg shadow-primary/20" onClick={() => handleSave('upcoming')} disabled={saving}>
+            {saving ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />} Publish Test
           </Button>
         </div>
       </div>
@@ -55,24 +167,54 @@ export const AdminCreateTest = () => {
         <div className="lg:col-span-2 space-y-8">
           <Card title="Test Details" description="Configure basic information and logic">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input label="Test Title" placeholder="e.g. Weekly Quiz on Polynomials" />
+              <Input 
+                label="Test Title" 
+                placeholder="e.g. Weekly Quiz on Polynomials" 
+                value={formData.title}
+                onChange={(e) => handleChange('title', e.target.value)}
+              />
               <div className="space-y-1.5 flex flex-col">
                 <label className="text-sm font-semibold text-slate-700 italic">Subject</label>
-                <select className="h-10 px-3 rounded-lg border border-slate-200 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
-                  <option>Mathematics</option>
-                  <option>Science</option>
-                  <option>English</option>
+                <select 
+                  className="h-10 px-3 rounded-lg border border-slate-200 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  value={formData.subject}
+                  onChange={(e) => handleChange('subject', e.target.value)}
+                >
+                  <option value="Mathematics">Mathematics</option>
+                  <option value="Science">Science</option>
+                  <option value="English">English</option>
+                  <option value="Physics">Physics</option>
+                  <option value="Chemistry">Chemistry</option>
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <Input label="Duration (Mins)" placeholder="60" type="number" />
-                <Input label="Total Marks" placeholder="50" type="number" />
+                <Input 
+                  label="Duration (Mins)" 
+                  type="number" 
+                  value={formData.duration}
+                  onChange={(e) => handleChange('duration', e.target.value)}
+                />
+                <Input 
+                  label="Total Marks" 
+                  type="number" 
+                  value={formData.totalMarks}
+                  onChange={(e) => handleChange('totalMarks', e.target.value)}
+                />
               </div>
               <div className="space-y-1.5 flex flex-col">
-                <label className="text-sm font-semibold text-slate-700 italic">Class/Grade</label>
-                <div className="flex gap-2">
-                  {[8, 9, 10].map(grade => (
-                    <button key={grade} className="flex-1 py-1.5 border-2 border-slate-100 rounded-lg text-xs font-black text-slate-500 hover:border-primary hover:text-primary transition-all">
+                <label className="text-sm font-semibold text-slate-700 italic">Class/Grade Scope</label>
+                <div className="flex flex-wrap gap-2">
+                  {['8', '9', '10', '11', '12'].map(grade => (
+                    <button 
+                      key={grade} 
+                      onClick={() => handleChange('class', grade)}
+                      className={cn(
+                        "flex-1 py-1.5 border-2 rounded-lg text-xs font-black transition-all",
+                        formData.class === grade 
+                          ? "border-primary text-primary bg-primary/5" 
+                          : "border-slate-100 text-slate-500 hover:border-slate-300"
+                      )}
+                    >
                       CL {grade}
                     </button>
                   ))}
@@ -97,9 +239,9 @@ export const AdminCreateTest = () => {
                 key={q.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
+                transition={{ duration: 0.2 }}
               >
-                <Card className="relative overflow-visible group">
+                <Card className="relative overflow-visible group border-slate-200 shadow-sm hover:border-primary/30 transition-all">
                   <div className="absolute -left-3 top-6 bg-slate-900 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm shadow-xl z-10 rotate-[-4deg]">
                     {idx + 1}
                   </div>
@@ -107,8 +249,10 @@ export const AdminCreateTest = () => {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <textarea 
-                          placeholder="Enter question text here..."
-                          className="w-full bg-slate-50 border-none rounded-xl p-4 text-sm font-medium italic focus:ring-2 focus:ring-primary/20 outline-none min-h-[80px]"
+                          placeholder="Enter question scenario or text here..."
+                          className="w-full bg-slate-50 border border-slate-100 rounded-xl p-4 text-sm font-medium italic focus:ring-2 focus:ring-primary/20 outline-none min-h-[80px]"
+                          value={q.text}
+                          onChange={(e) => updateQuestionText(q.id, e.target.value)}
                         />
                       </div>
                       <Button 
@@ -121,17 +265,25 @@ export const AdminCreateTest = () => {
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                       {q.options.map((opt, oIdx) => (
-                        <div key={oIdx} className="flex items-center gap-3 group/opt">
+                        <div key={oIdx} className={cn(
+                          "flex items-center gap-3 p-2 rounded-lg border transition-all",
+                          q.correctAnswer === oIdx ? "border-emerald-500 bg-emerald-50" : "border-slate-100 hover:border-slate-300"
+                        )}>
                           <input 
                             type="radio" 
                             name={`correct-${q.id}`} 
-                            className="w-4 h-4 text-primary focus:ring-primary border-slate-300" 
+                            checked={q.correctAnswer === oIdx}
+                            onChange={() => updateCorrectAnswer(q.id, oIdx)}
+                            className="w-4 h-4 text-emerald-500 focus:ring-emerald-500 border-slate-300 shrink-0"
+                            title="Mark as correct answer"
                           />
                           <input 
                             placeholder={`Option ${String.fromCharCode(65 + oIdx)}`}
-                            className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:border-primary focus:outline-none"
+                            className="flex-1 bg-transparent border-none rounded-sm px-2 py-1 text-sm font-semibold focus:ring-0 focus:outline-none"
+                            value={opt}
+                            onChange={(e) => updateOption(q.id, oIdx, e.target.value)}
                           />
                         </div>
                       ))}
@@ -146,7 +298,7 @@ export const AdminCreateTest = () => {
               className="w-full h-16 border-dashed border-2 rounded-2xl gap-3 text-slate-500 hover:border-primary hover:text-primary hover:bg-primary/5 italic font-bold"
               onClick={addQuestion}
             >
-              <PlusCircle size={24} /> New Question
+              <PlusCircle size={24} /> New Blank Question
             </Button>
           </div>
         </div>
@@ -160,9 +312,9 @@ export const AdminCreateTest = () => {
                   <BrainCircuit size={18} /> Smart Assist
                 </div>
                 <p className="text-xs text-slate-600 font-medium italic mb-4 leading-relaxed">
-                  I can help you generate board-pattern questions for 'Quadratic Equations' with medium difficulty.
+                  I can auto-populate standard board-pattern questions for 'Polynomials' mapped to medium difficulty arrays.
                 </p>
-                <Button size="sm" className="w-full gap-2 rounded-xl font-black italic shadow-md">
+                <Button size="sm" className="w-full gap-2 rounded-xl font-black italic shadow-md" onClick={handleSmartGenerate}>
                   Generate 5 MCQ <Plus size={16} />
                 </Button>
               </div>
@@ -183,21 +335,49 @@ export const AdminCreateTest = () => {
           <Card title="Publish Settings" description="Choose target and timing">
             <div className="space-y-4 pt-2">
               <div className="space-y-2 flex flex-col">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-tighter">Target Batches</label>
-                <div className="flex flex-wrap gap-2">
-                  {['Morning Elite', 'Evening Start', 'Weekend Class'].map(b => (
-                    <button key={b} className="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-black text-slate-600 hover:bg-primary hover:text-white transition-all uppercase">
-                      {b}
-                    </button>
-                  ))}
-                </div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-tighter">Target Specific Batches</label>
+                {loadingBatches ? (
+                   <div className="text-xs italic text-slate-400">Loading active batches...</div>
+                ) : batches.length === 0 ? (
+                   <div className="text-xs italic text-slate-400">No active batches available.</div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {batches.map(b => (
+                      <button 
+                        key={b._id} 
+                        onClick={() => toggleBatch(b._id)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-full text-[10px] font-black transition-all uppercase border",
+                          formData.targetBatches.includes(b._id)
+                            ? "bg-primary text-white border-primary shadow-sm"
+                            : "bg-slate-50 text-slate-600 border-slate-200 hover:border-primary/50"
+                        )}
+                      >
+                        {b.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              <Input label="Scheduled Date" type="date" />
-              <Input label="Start Time" type="time" />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <Input 
+                  label="Scheduled Date" 
+                  type="date" 
+                  value={formData.date}
+                  onChange={(e) => handleChange('date', e.target.value)}
+                />
+                <Input 
+                  label="Start Time" 
+                  type="time" 
+                  value={formData.time}
+                  onChange={(e) => handleChange('time', e.target.value)}
+                />
+              </div>
               
               <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                 <AlertCircle size={18} className="text-amber-500 shrink-0" />
-                <p className="text-[10px] text-slate-500 font-semibold italic">Students will receive a push notification 15 mins before start time.</p>
+                <p className="text-[10px] text-slate-500 font-semibold italic">Students mapped by class or explicitly selected batches will be evaluated.</p>
               </div>
             </div>
           </Card>

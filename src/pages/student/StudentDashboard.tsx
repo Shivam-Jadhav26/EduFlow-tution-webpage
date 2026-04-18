@@ -59,11 +59,12 @@ export const StudentDashboard = () => {
     );
   }
 
+  const stats = data.stats || {};
   const kpis = [
-    { label: 'Attendance', val: data.kpis.attendance, icon: Calendar, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Avg. Score', val: data.kpis.avgScore, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Total Doubts', val: data.kpis.totalDoubts.toString(), icon: MessageSquare, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'Tests Taken', val: data.kpis.testsTaken.toString().padStart(2, '0'), icon: ClipboardList, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { label: 'Attendance', val: `${stats.attendancePct || 0}%`, icon: Calendar, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Avg. Score', val: `${stats.avgScore || 0}%`, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Total Doubts', val: (stats.totalDoubts || 0).toString(), icon: MessageSquare, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'Tests Taken', val: (stats.testsTaken || 0).toString().padStart(2, '0'), icon: ClipboardList, color: 'text-indigo-600', bg: 'bg-indigo-50' },
   ];
 
   return (
@@ -102,7 +103,7 @@ export const StudentDashboard = () => {
         <Card className="lg:col-span-2" title="Learning Progress" description="Your performance trend across monthly assessments">
           <div className="h-[300px] w-full pt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.performanceTrend}>
+              <AreaChart data={data.performanceData || []}>
                 <defs>
                   <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#0d9488" stopOpacity={0.1}/>
@@ -199,21 +200,21 @@ export const StudentDashboard = () => {
         {/* Recent Performance Recap */}
         <Card title="Quick Test History" description="Recent assessment outcomes">
            <div className="space-y-4 pt-2">
-              {(data.recentTests || []).map((res: any, i: number) => (
+              {(data.recentResults || []).map((res: any, i: number) => (
                 <div key={i} className="flex justify-between items-center p-3 rounded-xl border border-slate-50 bg-slate-50/30 italic">
                   <div>
-                    <p className="text-sm font-bold text-slate-800 leading-none mb-1">{res.test}</p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{res.date}</p>
+                    <p className="text-sm font-bold text-slate-800 leading-none mb-1">{res.test || 'Test'}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{new Date(res.date).toLocaleDateString()}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-black text-primary leading-none mb-1">{res.score}</p>
-                    <Badge variant={res.score.split('/')[0] >= res.score.split('/')[1]/2 ? 'success' : 'error'} className="text-[8px] uppercase">
-                      {res.score.split('/')[0] >= res.score.split('/')[1]/2 ? 'PASS' : 'FAIL'}
+                    <Badge variant={res.passed ? 'success' : 'error'} className="text-[8px] uppercase">
+                      {res.passed ? 'PASS' : 'FAIL'}
                     </Badge>
                   </div>
                 </div>
               ))}
-              {!data.recentTests?.length && (
+              {!data.recentResults?.length && (
                 <p className="text-center py-8 text-slate-400 font-bold italic text-sm">No recent tests taken.</p>
               )}
            </div>
@@ -247,7 +248,7 @@ export const StudentDashboard = () => {
         <Card title="Attendance Summary" description="Subject-wise percentage">
           <div className="h-[200px] w-full pt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.attendanceBySubject}>
+              <BarChart data={data.attendanceBySubject || []}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis 
                   dataKey="name" 
