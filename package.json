@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "tsx backend/src/server.js",
+    "server": "tsx watch backend/src/server.js",
     "start": "node backend/src/server.js",
     "seed": "tsx backend/src/seed/seed.js",
     "build": "vite build",

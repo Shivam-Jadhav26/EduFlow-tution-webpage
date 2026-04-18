@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { 
-  Plus, Search, Filter, MoreVertical, 
+import {
+  Plus, Search, Filter, MoreVertical,
   Users, Clock, Layers, GraduationCap,
-  ArrowRight, Edit2, User
+  ArrowRight, Edit2, User, UserPlus
 } from 'lucide-react';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
@@ -11,6 +11,7 @@ import { Badge } from '../../components/common/Badge';
 import { cn } from '../../utils/cn';
 import api from '../../services/api';
 import { BatchModal } from '../../components/admin/BatchModal';
+import { QuickAddStudentModal } from '../../components/admin/QuickAddStudentModal';
 
 export const AdminBatches = () => {
   const [batches, setBatches] = useState<any[]>([]);
@@ -25,6 +26,7 @@ export const AdminBatches = () => {
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBatch, setEditingBatch] = useState<any | null>(null);
+  const [quickAddBatch, setQuickAddBatch] = useState<any | null>(null);
 
   const fetchBatches = async () => {
     try {
@@ -74,7 +76,7 @@ export const AdminBatches = () => {
 
   const filteredBatches = batches.filter(batch => {
     const matchesSearch = batch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         batch.class.toLowerCase().includes(searchTerm.toLowerCase());
+      batch.class.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesClass = !filterClass || batch.class === filterClass;
     const matchesStatus = !filterStatus || batch.status === filterStatus;
     return matchesSearch && matchesClass && matchesStatus;
@@ -82,9 +84,9 @@ export const AdminBatches = () => {
 
   const statsData = {
     totalActive: batches.filter(b => b.status === 'ACTIVE').length,
-    classesCovered: [...new Set(batches.map(b => b.class))].length > 0 
-                    ? `${Math.min(...batches.map(b => parseInt(b.class) || 0))}-${Math.max(...batches.map(b => parseInt(b.class) || 0))}th`
-                    : 'N/A',
+    classesCovered: [...new Set(batches.map(b => b.class))].length > 0
+      ? `${Math.min(...batches.map(b => parseInt(b.class) || 0))}-${Math.max(...batches.map(b => parseInt(b.class) || 0))}th`
+      : 'N/A',
     peakSlot: '04:00 PM'
   };
 
@@ -104,7 +106,7 @@ export const AdminBatches = () => {
           <h1 className="text-2xl font-black text-slate-900 italic tracking-tight">Batches Management</h1>
           <p className="text-slate-500 font-medium italic">Monitor batch strength, timings, and enrollment status.</p>
         </div>
-        <Button 
+        <Button
           onClick={() => { setEditingBatch(null); setIsModalOpen(true); }}
           className="gap-2 font-black italic rounded-xl h-12 px-6 shadow-lg shadow-primary/20"
         >
@@ -153,8 +155,8 @@ export const AdminBatches = () => {
           />
         </div>
         <div className="relative">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={(e) => { e.stopPropagation(); setShowFilters(!showFilters); setShowMenu(null); }}
             className="gap-2 italic font-bold rounded-xl h-12"
           >
@@ -165,7 +167,7 @@ export const AdminBatches = () => {
               <div className="p-2 space-y-4">
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-500 uppercase italic">Filter by Class</label>
-                  <select 
+                  <select
                     value={filterClass}
                     onChange={(e) => setFilterClass(e.target.value)}
                     className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold italic focus:border-primary outline-none bg-transparent"
@@ -178,7 +180,7 @@ export const AdminBatches = () => {
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-500 uppercase italic">Filter by Status</label>
-                  <select 
+                  <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
                     className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold italic focus:border-primary outline-none bg-transparent"
@@ -201,18 +203,18 @@ export const AdminBatches = () => {
             whileHover={{ y: -5 }}
             className="group bg-white rounded-3xl border border-slate-100 p-1 flex flex-col shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all overflow-hidden"
           >
-            <div className="p-6">
+            <div className="p-6 pb-4">
               <div className="flex justify-between items-start mb-6">
                 <div className="space-y-1">
                   <Badge variant="outline" className="italic">{batch.class}</Badge>
                   <h3 className="text-xl font-black text-slate-900 italic leading-tight group-hover:text-primary transition-colors line-clamp-1">{batch.name}</h3>
                 </div>
                 <div className="relative">
-                  <button 
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setShowFilters(false);
-                      setShowMenu(showMenu === (batch._id || batch.id) ? null : (batch._id || batch.id)); 
+                      setShowMenu(showMenu === (batch._id || batch.id) ? null : (batch._id || batch.id));
                     }}
                     className="p-2 h-fit text-slate-300 hover:text-slate-900 transition-colors"
                   >
@@ -220,13 +222,13 @@ export const AdminBatches = () => {
                   </button>
                   {showMenu === (batch._id || batch.id) && (
                     <div className="absolute right-0 top-full mt-1 w-32 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-10" onClick={e => e.stopPropagation()}>
-                      <button 
+                      <button
                         onClick={() => { setEditingBatch(batch); setIsModalOpen(true); setShowMenu(null); }}
                         className="w-full text-left px-4 py-2 text-sm font-bold italic text-slate-600 hover:bg-slate-50 hover:text-primary transition-colors"
                       >
                         Edit
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDelete(batch._id || batch.id)}
                         className="w-full text-left px-4 py-2 text-sm font-bold italic text-red-600 hover:bg-red-50 transition-colors"
                       >
@@ -238,7 +240,6 @@ export const AdminBatches = () => {
               </div>
 
               <div className="space-y-4">
-                {/* Enrollment Progress Bar (from friend's version) */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[10px] font-black italic">
                     <span className="text-slate-400 uppercase tracking-widest">Enrollment</span>
@@ -256,20 +257,20 @@ export const AdminBatches = () => {
                 <div className="grid grid-cols-2 gap-4 pt-2">
                   <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 italic">
                     <Clock size={12} className="text-slate-400 shrink-0" />
-                    <span className="truncate">{batch.timing ? batch.timing.split(' - ')[0] : 'No Time'}</span>
+                    <span className="truncate">{batch.timing || batch.schedule?.split(' | ')[1] || 'No Time'}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={cn(
                       "inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full",
-                      batch.status === 'ACTIVE'
+                      batch.status === 'ACTIVE' || batch.isActive
                         ? 'bg-emerald-50 text-emerald-600'
                         : 'bg-slate-100 text-slate-400'
                     )}>
                       <span className={cn(
                         "w-1.5 h-1.5 rounded-full",
-                        batch.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-slate-400'
+                        batch.status === 'ACTIVE' || batch.isActive ? 'bg-emerald-500' : 'bg-slate-400'
                       )} />
-                      {batch.status === 'ACTIVE' ? 'Active' : 'Inactive'}
+                      {batch.status === 'ACTIVE' || batch.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
                 </div>
@@ -283,30 +284,46 @@ export const AdminBatches = () => {
               </div>
             </div>
 
-            <div 
-              onClick={(e) => {
-                e.stopPropagation();
-                setEditingBatch(batch);
-                setIsModalOpen(true);
-              }}
-              className="mt-auto border-t border-slate-50 p-4 bg-slate-50/50 group-hover:bg-primary transition-colors cursor-pointer flex items-center justify-between overflow-hidden"
-            >
-              <span className="text-xs font-black italic tracking-tight text-slate-600 group-hover:text-white transition-colors uppercase">Edit Batch Settings</span>
-              <div className="flex items-center gap-2">
-                 <Edit2 size={14} className="text-slate-400 group-hover:text-white transition-colors" />
-                 <ArrowRight size={16} className="text-slate-400 group-hover:text-white transition-all transform group-hover:translate-x-1" />
-              </div>
+            <div className="mt-auto flex border-t border-slate-50 divide-x divide-slate-100 overflow-hidden rounded-b-3xl">
+              <button
+                onClick={(e) => { e.stopPropagation(); setQuickAddBatch(batch); }}
+                className="flex-1 p-4 bg-slate-50/80 hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center gap-2 group/add text-slate-600"
+              >
+                <UserPlus size={16} className="text-emerald-500 group-hover/add:text-white transition-colors" />
+                <span className="text-xs font-black italic tracking-tight uppercase">Add Student</span>
+              </button>
+
+              <button
+                onClick={(e) => { e.stopPropagation(); setEditingBatch(batch); setIsModalOpen(true); }}
+                className="flex-1 p-4 bg-slate-50/80 hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2 group/edit text-slate-600"
+              >
+                <Edit2 size={16} className="text-primary group-hover/edit:text-white transition-colors" />
+                <span className="text-xs font-black italic tracking-tight uppercase">Settings</span>
+              </button>
             </div>
           </motion.div>
         ))}
       </div>
 
-      <BatchModal 
+      <BatchModal
         isOpen={isModalOpen}
         onClose={() => { setIsModalOpen(false); setEditingBatch(null); }}
         onSubmit={handleCreateEdit}
         initialData={editingBatch}
       />
+
+      <QuickAddStudentModal
+        isOpen={!!quickAddBatch}
+        onClose={() => setQuickAddBatch(null)}
+        targetId={quickAddBatch?._id || quickAddBatch?.id}
+        targetName={quickAddBatch?.name}
+        targetClass={quickAddBatch?.class}
+        targetType="batch"
+        onSuccess={() => {
+          fetchBatches(); // Refresh batch strength and enrollments after adding
+        }}
+      />
     </div>
   );
 };
+

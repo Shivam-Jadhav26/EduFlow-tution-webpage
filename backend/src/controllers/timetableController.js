@@ -1,5 +1,5 @@
-const TimetableEntry = require('../models/TimetableEntry');
 const User = require('../models/User');
+const Batch = require('../models/Batch');
 const { sendSuccess, sendError } = require('../utils/response');
 
 const getTimetable = async (req, res, next) => {
@@ -11,13 +11,47 @@ const getTimetable = async (req, res, next) => {
       batchId = req.user.batch;
     }
 
-    const query = {};
-    if (batchId) query.batchId = batchId;
+    if (!batchId) {
+       return sendSuccess(res, { timetable: [] });
+    }
 
     const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const entries = await TimetableEntry.find(query)
-      .populate('batchId', 'name class')
-      .sort({ day: 1, time: 1 });
+    let entries = [];
+
+    // DIRECT DATABASE FETCH FROM BATCHES
+    const batch = await Batch.findById(batchId);
+    if (batch && batch.schedule && typeof batch.schedule === 'string') {
+      const parts = batch.schedule.split('|');
+      if (parts.length === 2) {
+        const daysStr = parts[0].trim();
+        const timeStr = parts[1].trim();
+        
+        const dayMap = {
+          'Mon': 'Monday', 'Tue': 'Tuesday', 'Wed': 'Wednesday',
+          'Thu': 'Thursday', 'Fri': 'Friday', 'Sat': 'Saturday', 'Sun': 'Sunday'
+        };
+
+        const rawDays = daysStr.split(',').map(d => d.trim());
+        
+        rawDays.forEach((rawDay, index) => {
+          const fullDay = dayMap[rawDay] || rawDay;
+          entries.push({
+            _id: `auto-${index}`,
+            day: fullDay,
+            time: timeStr,
+            subject: batch.name + ' Class',
+            teacher: batch.teacher || 'Main Faculty',
+            room: 'Main Hall',
+            batchId: {
+              _id: batch._id,
+              name: batch.name,
+              class: batch.class
+            },
+            type: 'class'
+          });
+        });
+      }
+    }
 
     // Sort by day order
     entries.sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
