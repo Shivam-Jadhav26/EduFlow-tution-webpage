@@ -100,6 +100,7 @@ const getStudentDashboard = async (req, res, next) => {
       doubts,
       upcomingClasses,
       recentResults,
+      availableTests
     ] = await Promise.all([
       Attendance.find({ studentId }),
       TestAttempt.find({ studentId, status: 'submitted' }),
@@ -109,12 +110,29 @@ const getStudentDashboard = async (req, res, next) => {
         .sort({ submittedAt: -1 })
         .limit(3)
         .populate('testId', 'title subject totalMarks'),
+      Test.find({ 
+        status: { $in: ['upcoming', 'ongoing', 'published'] }, 
+        targetBatches: student.batch?._id 
+      })
     ]);
 
     // Attendance %
     const totalAtt = attendanceRecords.length;
     const presentAtt = attendanceRecords.filter((r) => r.status !== 'absent').length;
     const attendancePct = totalAtt > 0 ? Math.round((presentAtt / totalAtt) * 100) : 0;
+
+    // Subject Attendance
+    const attendanceBySubjectMap = {};
+    attendanceRecords.forEach(r => {
+      const subj = r.subject || 'General';
+      if (!attendanceBySubjectMap[subj]) attendanceBySubjectMap[subj] = { total: 0, present: 0 };
+      attendanceBySubjectMap[subj].total += 1;
+      if (r.status !== 'absent') attendanceBySubjectMap[subj].present += 1;
+    });
+    const attendanceBySubject = Object.entries(attendanceBySubjectMap).map(([name, data]) => ({
+      name,
+      pct: Math.round((data.present / data.total) * 100),
+    }));
 
     // Avg score
     const avgScore =
@@ -145,6 +163,48 @@ const getStudentDashboard = async (req, res, next) => {
       })
     );
 
+    // AI Recommendations logic
+    const recommendations = [];
+    if (attendancePct > 0 && attendancePct < 75) {
+      recommendations.push({
+        type: 'High',
+        title: 'Attendance Alert',
+        desc: `Your overall attendance is ${attendancePct}%. Consistent attendance resolves doubts early.`
+      });
+    }
+    if (avgScore > 0 && avgScore < 60) {
+      recommendations.push({
+        type: 'Med',
+        title: 'Score Intervention',
+        desc: `Your average stays at ${avgScore}%. Reach out to mentors via the Doubts sections!`
+      });
+    }
+    if (recommendations.length === 0) {
+       recommendations.push({
+        type: 'Low',
+        title: 'Outstanding Form!',
+        desc: 'You are balancing attendance and tests exquisitely. Keep it up!'
+      });
+    }
+
+    // Identify Pending/Active tests (missing submissions)
+    const submittedTestIds = testAttempts.map(a => a.testId._id ? a.testId._id.toString() : a.testId.toString());
+    const pendingTests = availableTests.filter(t => !submittedTestIds.includes(t._id.toString()));
+
+    const courses = pendingTests.map(t => ({
+      _id: t._id,
+      title: t.title,
+      subject: t.subject,
+      progress: 0,
+      img: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=400&h=200'
+    }));
+
+    const tasks = pendingTests.slice(0, 3).map(t => ({
+      task: `Complete Assessment: ${t.title}`,
+      due: 'Pending',
+      done: false
+    }));
+
     return sendSuccess(res, {
       stats: {
         attendancePct,
@@ -153,6 +213,10 @@ const getStudentDashboard = async (req, res, next) => {
         testsTaken: testAttempts.length,
       },
       performanceData,
+      recommendations,
+      courses,
+      tasks,
+      attendanceBySubject,
       upcomingClasses: upcomingClasses.map((c) => ({
         subject: c.subject,
         teacher: c.teacher,

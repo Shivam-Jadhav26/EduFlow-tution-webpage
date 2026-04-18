@@ -18,7 +18,7 @@ export const StudentResults = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/results')
+    api.get('/results/me')
       .then(res => setResults(res.data.data.results || []))
       .catch(err => console.error('Failed to fetch results:', err))
       .finally(() => setLoading(false));

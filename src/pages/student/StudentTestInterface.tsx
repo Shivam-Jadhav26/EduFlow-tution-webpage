@@ -25,6 +25,14 @@ export const StudentTestInterface = () => {
       try {
         const response = await api.get(`/tests/${id}`);
         const testData = response.data.data.test;
+        const attemptData = response.data.data.attempt;
+        
+        if (attemptData && attemptData.status === 'submitted') {
+          alert('You have already submitted this test.');
+          navigate('/student/results');
+          return;
+        }
+
         setTest(testData);
         setQuestions(testData.questions || []);
         setTimeLeft((testData.duration || 30) * 60);

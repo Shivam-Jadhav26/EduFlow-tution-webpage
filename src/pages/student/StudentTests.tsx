@@ -18,7 +18,7 @@ export const StudentTests = () => {
         setLoading(true);
         const [testsRes, resultsRes] = await Promise.all([
           api.get('/tests'),
-          api.get('/results')
+          api.get('/results/me')
         ]);
         setTests(testsRes.data.data.tests || []);
         setResults(resultsRes.data.data.results || []);

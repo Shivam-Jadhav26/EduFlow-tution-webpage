@@ -43,6 +43,7 @@ const getTests = async (req, res, next) => {
         { targetBatches: batchId },
         { class: cls },
       ];
+      query.status = { $ne: 'draft' };
       if (req.query.status) query.status = req.query.status;
     } else {
       // Admin sees all

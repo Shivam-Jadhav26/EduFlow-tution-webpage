@@ -15,9 +15,11 @@ import { Button } from '../../components/common/Button';
 import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../utils/cn';
 import api from '../../services/api';
+import { useNavigate } from 'react-router-dom';
 
 export const StudentDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +70,7 @@ export const StudentDashboard = () => {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
       {/* Welcome Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -76,8 +78,8 @@ export const StudentDashboard = () => {
           <p className="text-slate-500 font-medium">Here's what's happening with your studies today.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Badge variant="secondary" className="px-4 py-2 text-sm italic">Class {user?.class} • {user?.batch}</Badge>
-          <Button size="sm" className="gap-2 rounded-full font-bold">Ask AI Doubts <BrainCircuit size={16} /></Button>
+          <Badge variant="secondary" className="px-4 py-2 text-sm italic">Class {user?.class} • {user?.batch?.name || user?.batch}</Badge>
+          <Button size="sm" onClick={() => navigate('/student/doubts')} className="gap-2 rounded-full font-bold">Ask AI Doubts <BrainCircuit size={16} /></Button>
         </div>
       </div>
 
@@ -148,7 +150,7 @@ export const StudentDashboard = () => {
                     s.type === 'High' ? 'bg-red-50 text-red-600' : 
                     s.type === 'Med' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
                   )}>
-                    {s.type === 'High' ? <BrainCircuit size={18} /> : s.type === 'Med' ? <CheckCircle2 size={18} /> : <Award size={18} />}
+                    {s.type === 'High' ? <AlertCircle size={18} /> : s.type === 'Med' ? <BrainCircuit size={18} /> : <CheckCircle2 size={18} />}
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -163,16 +165,15 @@ export const StudentDashboard = () => {
             {!data.recommendations?.length && (
               <p className="text-center py-8 text-slate-400 font-bold italic text-sm">No suggestions today. Keep studying!</p>
             )}
-            <Button variant="outline" className="w-full text-xs font-bold border-primary/20 text-primary hover:bg-primary/5">View Full Analysis</Button>
           </div>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-2" title="Continue Learning" description="Pick up where you left off in your enrolled subjects">
+        <Card className="lg:col-span-2" title="Active Assessments" description="Pending tests newly assigned to your batch">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             {(data.courses || []).map((course: any, i: number) => (
-              <div key={i} className="group relative rounded-2xl overflow-hidden aspect-video cursor-pointer shadow-sm hover:shadow-xl transition-all">
+              <div key={i} onClick={() => navigate('/student/tests')} className="group relative rounded-2xl overflow-hidden aspect-video cursor-pointer shadow-sm hover:shadow-xl transition-all">
                 <img src={course.img || 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=400&h=200'} alt={course.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent p-4 flex flex-col justify-end">
                   <Badge variant="secondary" className="w-fit mb-2 text-[10px] bg-white/20 text-white backdrop-blur-md border-white/30 italic">{course.subject}</Badge>
@@ -191,7 +192,7 @@ export const StudentDashboard = () => {
             ))}
             {!data.courses?.length && (
               <div className="col-span-2 text-center py-10 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                <p className="text-slate-400 font-black italic">No enrolled courses found.</p>
+                <p className="text-slate-400 font-black italic">No pending assessments at this time.</p>
               </div>
             )}
           </div>
@@ -234,13 +235,12 @@ export const StudentDashboard = () => {
                     <p className="text-xs text-slate-500 font-medium">{cls.teacher} • {cls.time}</p>
                   </div>
                 </div>
-                <Badge variant="secondary" className="text-[10px]">{cls.type}</Badge>
+                <Badge variant="secondary" className="text-[10px]">{cls.type || 'Lecture'}</Badge>
               </div>
             ))}
             {!data.upcomingClasses?.length && (
-              <p className="text-center py-8 text-slate-400 font-bold italic text-sm">No classes scheduled for today.</p>
+              <p className="text-center py-8 text-slate-400 font-bold italic text-sm flex items-center justify-center h-full">No classes scheduled for today.</p>
             )}
-            <Button variant="ghost" className="w-full text-xs font-bold text-slate-500">View Full Timetable</Button>
           </div>
         </Card>
 
@@ -269,14 +269,10 @@ export const StudentDashboard = () => {
           </div>
         </Card>
 
-        {/* Recent Homework/Tasks (Simulated via Notifications/Context) */}
-        <Card title="Tasks & Homework" description="Pending items for this week">
+        {/* Dynamic Task Tracking derived from Pending Tests/Alerts */}
+        <Card title="Pending Obligations" description="Prioritized items for this week">
           <div className="space-y-4">
-            {[
-              { task: 'Science Lab Manual', due: 'Tomorrow', done: false },
-              { task: 'History Notes (Ch-4)', due: '2 Days', done: false },
-              { task: 'Math Practice Sets', due: 'Done', done: true },
-            ].map((t, i) => (
+            {(data.tasks || []).map((t: any, i: number) => (
               <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
                 <div className={cn(
                   "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
@@ -286,10 +282,13 @@ export const StudentDashboard = () => {
                 </div>
                 <div className="flex-1">
                   <p className={cn("text-sm font-bold", t.done ? "text-slate-400 line-through" : "text-slate-700")}>{t.task}</p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{t.due === 'Done' ? 'Completed' : `Due ${t.due}`}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{t.due === 'Done' ? 'Completed' : `Due: ${t.due}`}</p>
                 </div>
               </div>
             ))}
+            {!data.tasks?.length && (
+              <p className="text-center py-8 text-slate-400 font-bold italic text-sm flex items-center justify-center h-full">You are all caught up! ✨</p>
+            )}
           </div>
         </Card>
       </div>
