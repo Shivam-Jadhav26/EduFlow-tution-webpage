@@ -1,0 +1,15 @@
+{
+  "name": "eduflow-backend",
+  "version": "1.0.0",
+  "description": "EduFlow Backend API",
+  "type": "commonjs",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node src/seed/seed.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
