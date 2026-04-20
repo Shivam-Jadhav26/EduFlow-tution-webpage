@@ -11,7 +11,8 @@ interface QuickAddStudentModalProps {
   targetId: string | null;
   targetName: string;
   targetClass: string;
-  targetType: 'batch' | 'course';
+  targetDefaultFees?: number;
+  targetType: 'batch';
   onSuccess: () => void;
 }
 
@@ -21,18 +22,27 @@ export const QuickAddStudentModal: React.FC<QuickAddStudentModalProps> = ({
   targetId,
   targetName,
   targetClass,
+  targetDefaultFees,
   targetType,
   onSuccess
 }) => {
   const [email, setEmail] = useState('');
+  const [fees, setFees] = useState<number | ''>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setFees(targetDefaultFees !== undefined ? targetDefaultFees : '');
+    }
+  }, [isOpen, targetDefaultFees]);
 
   if (!isOpen || !targetId) return null;
 
   const handleClose = () => {
     setEmail('');
+    setFees('');
     setError(null);
     setSuccessMsg(null);
     onClose();
@@ -59,7 +69,8 @@ export const QuickAddStudentModal: React.FC<QuickAddStudentModalProps> = ({
         // Enrolling existing student
         const updatedData = {
           ...exactMatch,
-          class: targetClass
+          class: targetClass,
+          fees: fees === '' ? null : fees
         };
         
         // Only link batch if we are in batch allocation mode
@@ -136,9 +147,21 @@ export const QuickAddStudentModal: React.FC<QuickAddStudentModalProps> = ({
                 />
               </div>
 
+              <div className="space-y-2 w-full text-left">
+                <label className="text-xs font-black text-slate-500 uppercase italic tracking-widest pl-1">Agreed Fees (₹)</label>
+                <Input
+                  type="number"
+                  value={fees}
+                  onChange={e => setFees(e.target.value === '' ? '' : Number(e.target.value))}
+                  placeholder="e.g. 500"
+                  className="w-full text-lg py-5 px-4 rounded-xl border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                />
+                <p className="text-[10px] font-bold text-slate-400 italic pl-1">Pre-filled with batch default.</p>
+              </div>
+
               <div className="w-full pt-4">
                 <Button type="submit" disabled={loading} className="w-full py-4 text-base gap-2 italic font-black shadow-lg shadow-primary/20 rounded-xl">
-                  {loading ? <Loader2 size={20} className="animate-spin" /> : 'Allocate Course'}
+                  {loading ? <Loader2 size={20} className="animate-spin" /> : 'Allocate to Batch'}
                 </Button>
               </div>
             </>

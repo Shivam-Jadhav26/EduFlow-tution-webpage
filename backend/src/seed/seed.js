@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 
 const User = require('../models/User');
 const Batch = require('../models/Batch');
-const Course = require('../models/Course');
+
 const TimetableEntry = require('../models/TimetableEntry');
 const Attendance = require('../models/Attendance');
 const Test = require('../models/Test');
@@ -27,7 +27,7 @@ const seed = async () => {
   await Promise.all([
     User.deleteMany({}),
     Batch.deleteMany({}),
-    Course.deleteMany({}),
+
     TimetableEntry.deleteMany({}),
     Attendance.deleteMany({}),
     Test.deleteMany({}),
@@ -78,14 +78,7 @@ const seed = async () => {
   );
   const rahul = students[0]; // primary test student
 
-  // ── 4. Courses ────────────────────────────────────────────────────────────────
-  console.log('📚 Seeding courses...');
-  await Course.insertMany([
-    { title: 'Class 10 - Board Intensive', description: 'Comprehensive coverage of CBSE Class 10 boards.', class: '10th', subjects: ['Mathematics', 'Science', 'English', 'SST'], thumbnail: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=400&h=250', isActive: true },
-    { title: 'Class 9 - Foundation Course', description: 'Foundation course for Class 9 students.', class: '9th', subjects: ['Mathematics', 'Science', 'Social Science', 'English', 'Computer'], thumbnail: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=400&h=250', isActive: true },
-    { title: 'Class 8 - Skill Builder', description: 'Developing analytical and logical thinking.', class: '8th', subjects: ['Mathematics', 'Science', 'English', 'Social Science'], thumbnail: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=400&h=250', isActive: true },
-    { title: 'Class 7 - Core Concepts', description: 'Strengthening basic concepts with fun-based learning.', class: '7th', subjects: ['Maths', 'English', 'General Science'], thumbnail: 'https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?auto=format&fit=crop&q=80&w=400&h=250', isActive: true },
-  ]);
+
 
   // ── 5. Timetable ──────────────────────────────────────────────────────────────
   console.log('📅 Seeding timetable...');
@@ -253,7 +246,7 @@ const seed = async () => {
   // ── 10. Notifications ─────────────────────────────────────────────────────────
   console.log('🔔 Seeding notifications...');
   await Notification.insertMany([
-    { userId: rahul._id, title: 'Algebra Prep Resource Update', message: 'New practice sets for Algebra have been uploaded. Check My Courses section.', type: 'info', date: new Date('2024-05-19'), isRead: false },
+    { userId: rahul._id, title: 'Algebra Prep Resource Update', message: 'New practice sets for Algebra have been uploaded.', type: 'info', date: new Date('2024-05-19'), isRead: false },
     { userId: rahul._id, title: 'Maths Test Scheduled', message: 'Weekly test on Algebra scheduled for Monday at 4:30 PM.', type: 'test', date: new Date('2024-05-18'), isRead: false },
     { userId: rahul._id, title: 'Fee Payment Success', message: 'We have received your payment of ₹5,000 for May 2024. Transaction ID: #TXN12345.', type: 'fee', date: new Date('2024-05-17'), isRead: true },
     { userId: null, title: 'Holiday Announcement', message: 'The institute will remain closed on 25th May on account of regional festival.', type: 'warning', date: new Date('2024-05-15'), isRead: false },

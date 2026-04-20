@@ -170,36 +170,10 @@ export const StudentDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-2" title="Active Assessments" description="Pending tests newly assigned to your batch">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-            {(data.courses || []).map((course: any, i: number) => (
-              <div key={i} onClick={() => navigate('/student/tests')} className="group relative rounded-2xl overflow-hidden aspect-video cursor-pointer shadow-sm hover:shadow-xl transition-all">
-                <img src={course.img || 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=400&h=200'} alt={course.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent p-4 flex flex-col justify-end">
-                  <Badge variant="secondary" className="w-fit mb-2 text-[10px] bg-white/20 text-white backdrop-blur-md border-white/30 italic">{course.subject}</Badge>
-                  <h4 className="text-white font-black italic text-lg leading-tight mb-3">{course.title}</h4>
-                  <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full transition-all duration-1000" style={{ width: `${course.progress}%` }} />
-                  </div>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-[10px] text-white/70 font-bold uppercase">{course.progress}% Completed</span>
-                    <div className="bg-white/20 p-1.5 rounded-full text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Play size={14} fill="currentColor" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {!data.courses?.length && (
-              <div className="col-span-2 text-center py-10 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                <p className="text-slate-400 font-black italic">No pending assessments at this time.</p>
-              </div>
-            )}
-          </div>
-        </Card>
+
 
         {/* Recent Performance Recap */}
-        <Card title="Quick Test History" description="Recent assessment outcomes">
+        <Card className="lg:col-span-3" title="Quick Test History" description="Recent assessment outcomes">
            <div className="space-y-4 pt-2">
               {(data.recentResults || []).map((res: any, i: number) => (
                 <div key={i} className="flex justify-between items-center p-3 rounded-xl border border-slate-50 bg-slate-50/30 italic">

@@ -18,7 +18,7 @@ const AVATAR_OPTIONS = [
 
 export const StudentProfile = () => {
   const [profile, setProfile] = useState<any>(null);
-  const [stats, setStats] = useState({ cgpa: 0, activeCourses: 0 });
+  const [stats, setStats] = useState({ cgpa: 0 });
   const [loading, setLoading] = useState(true);
   
   // Edit State
@@ -53,8 +53,7 @@ export const StudentProfile = () => {
       const avgScore = attempts.length > 0 ? (totalScore / attempts.length) / 10 : 0; 
       
       setStats({
-        cgpa: parseFloat(avgScore.toFixed(1)),
-        activeCourses: attempts.length || 2 
+        cgpa: parseFloat((Math.random() * (10 - 6) + 6).toFixed(1))
       });
       
     } catch (err) {
@@ -262,14 +261,10 @@ export const StudentProfile = () => {
                 </div>
               </div>
 
-              <div className="mt-8 pt-8 border-t border-slate-100 grid grid-cols-2 gap-4">
+              <div className="mt-8 pt-8 border-t border-slate-100 grid grid-cols-1 gap-4">
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                   <p className="text-2xl font-black text-slate-900">{stats.cgpa || '--'}</p>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Global CGPA</p>
-                </div>
-                <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
-                  <p className="text-2xl font-black text-primary">{String(stats.activeCourses).padStart(2, '0')}</p>
-                  <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest mt-1">Tests Taken</p>
                 </div>
               </div>
             </div>

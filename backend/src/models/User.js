@@ -21,16 +21,16 @@ const userSchema = new mongoose.Schema(
     parentName: { type: String, default: null },
     parentPhone: { type: String, default: null },
     address: { type: String, default: null },
+    fees: { type: Number, default: null },
     status: { type: String, enum: ['active', 'inactive', 'pending'], default: 'active' },
   },
   { timestamps: true }
 );
 
 // Hash password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('passwordHash')) return next();
+userSchema.pre('save', async function () {
+  if (!this.isModified('passwordHash')) return;
   this.passwordHash = await bcrypt.hash(this.passwordHash, 12);
-  next();
 });
 
 // Compare password

@@ -12,7 +12,6 @@ import { Contact } from './pages/public/Contact';
 
 // Dashboard Pages
 import { StudentDashboard } from './pages/student/StudentDashboard';
-import { StudentCourses } from './pages/student/StudentCourses';
 import { StudentTestInterface } from './pages/student/StudentTestInterface';
 import { StudentAttendance } from './pages/student/StudentAttendance';
 import { StudentFees } from './pages/student/StudentFees';
@@ -28,7 +27,6 @@ import { AdminStudents } from './pages/admin/AdminStudents';
 import { AdminTests } from './pages/admin/AdminTests';
 import { AdminCreateTest } from './pages/admin/AdminCreateTest';
 import { AdminBatches } from './pages/admin/AdminBatches';
-import { AdminCourses } from './pages/admin/AdminCourses';
 import { AdminTimetable } from './pages/admin/AdminTimetable';
 import { AdminAttendance } from './pages/admin/AdminAttendance';
 import { AdminResults } from './pages/admin/AdminResults';
@@ -60,7 +58,6 @@ export default function App() {
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<Placeholder name="About Us" />} />
-            <Route path="/courses" element={<Placeholder name="Our Courses" />} />
             <Route path="/testimonials" element={<Placeholder name="Testimonials" />} />
             <Route path="/contact" element={<Contact />} />
           </Route>
@@ -73,7 +70,6 @@ export default function App() {
           <Route element={<ProtectedRoute allowedRoles={['student']} />}>
             <Route path="/student" element={<DashboardLayout />}>
               <Route path="dashboard" element={<StudentDashboard />} />
-              <Route path="courses" element={<StudentCourses />} />
               <Route path="attendance" element={<StudentAttendance />} />
               <Route path="timetable" element={<StudentTimetable />} />
               <Route path="tests" element={<StudentTests />} />
@@ -93,11 +89,11 @@ export default function App() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="students" element={<AdminStudents />} />
               <Route path="batches" element={<AdminBatches />} />
-              <Route path="courses" element={<AdminCourses />} />
               <Route path="timetable" element={<AdminTimetable />} />
               <Route path="attendance" element={<AdminAttendance />} />
               <Route path="tests" element={<AdminTests />} />
               <Route path="tests/create" element={<AdminCreateTest />} />
+              <Route path="assignments" element={<Placeholder name="Assignments" />} />
               <Route path="results" element={<AdminResults />} />
               <Route path="fees" element={<AdminFees />} />
               <Route path="analytics" element={<AdminAnalytics />} />

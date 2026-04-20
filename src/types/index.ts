@@ -10,19 +10,9 @@ export interface User {
   batch?: string;
 }
 
-export interface Course {
-  id: string;
-  title: string;
-  description: string;
-  class: string;
-  subjects: string[];
-  thumbnail: string;
-}
-
 export interface Subject {
   id: string;
   name: string;
-  courseId: string;
   teacher: string;
 }
 

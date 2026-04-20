@@ -9,24 +9,44 @@ const getBatches = async (req, res, next) => {
     if (search) {
       query.name = { $regex: search, $options: 'i' };
     }
-    const batches = await Batch.find(query).sort({ name: 1 });
+    const batches = await Batch.aggregate([
+      { $match: query },
+      {
+        $lookup: {
+          from: 'users',
+          let: { batchId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$batch', '$$batchId'] } } },
+            { $project: { _id: 1, name: 1 } }
+          ],
+          as: 'students'
+        }
+      },
+      { $sort: { name: 1 } }
+    ]);
     return sendSuccess(res, { batches });
   } catch (err) { next(err); }
 };
 
 const getBatch = async (req, res, next) => {
   try {
-    const batch = await Batch.findById(req.params.id);
+    const batch = await Batch.findById(req.params.id).lean();
     if (!batch) return sendError(res, 'Batch not found.', 404);
+    
+    // Also fetch students for this batch to ensure consistency
+    const mongoose = require('mongoose');
+    const students = await mongoose.model('User').find({ batch: batch._id, role: 'student' }).select('_id name');
+    batch.students = students;
+
     return sendSuccess(res, { batch });
   } catch (err) { next(err); }
 };
 
 const createBatch = async (req, res, next) => {
   try {
-    const { name, description, class: cls, schedule, teacher } = req.body;
+    const { name, description, class: cls, schedule, teacher, defaultFees } = req.body;
     if (!name || !cls) return sendError(res, 'Name and class are required.', 400);
-    const batch = await Batch.create({ name, description, class: cls, schedule, teacher });
+    const batch = await Batch.create({ name, description, class: cls, schedule, teacher, defaultFees: Number(defaultFees) || 0 });
     return sendSuccess(res, { batch }, 'Batch created.', 201);
   } catch (err) { next(err); }
 };

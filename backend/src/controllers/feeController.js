@@ -16,11 +16,52 @@ const getAllFees = async (req, res, next) => {
     if (req.query.studentId) query.studentId = req.query.studentId;
     if (req.query.status) query.status = req.query.status;
     if (req.query.month) query.month = { $regex: req.query.month, $options: 'i' };
+    
+    if (req.query.startDate || req.query.endDate) {
+      query.createdAt = {};
+      if (req.query.startDate) query.createdAt.$gte = new Date(req.query.startDate);
+      if (req.query.endDate) {
+        let endDate = new Date(req.query.endDate);
+        endDate.setHours(23, 59, 59, 999);
+        query.createdAt.$lte = endDate;
+      }
+    }
 
     const fees = await FeeRecord.find(query)
-      .populate('studentId', 'name email class')
-      .sort({ createdAt: -1 });
-    return sendSuccess(res, { fees });
+      .populate({ 
+          path: 'studentId', 
+          select: 'name email class fees batch',
+          populate: { path: 'batch', select: 'defaultFees' }
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const studentIds = [...new Set(fees.map(f => f.studentId?._id?.toString()).filter(Boolean))];
+    
+    let studentPaidMap = {};
+    if (studentIds.length > 0) {
+      const dbMongoose = require('mongoose');
+      const objectIds = studentIds.map(id => new dbMongoose.Types.ObjectId(id));
+      const paidAgg = await FeeRecord.aggregate([
+        { $match: { studentId: { $in: objectIds }, status: 'paid' } },
+        { $group: { _id: '$studentId', totalPaid: { $sum: '$amount' } } }
+      ]);
+      paidAgg.forEach(p => {
+        studentPaidMap[p._id.toString()] = p.totalPaid;
+      });
+    }
+
+    const enrichedFees = fees.map(f => {
+      if (!f.studentId) return f;
+      const baseFee = (f.studentId.fees !== null && f.studentId.fees !== undefined) 
+         ? f.studentId.fees 
+         : (f.studentId.batch?.defaultFees || 0);
+      const paid = studentPaidMap[f.studentId._id.toString()] || 0;
+      f.currentPendingBalance = Math.max(0, baseFee - paid);
+      return f;
+    });
+
+    return sendSuccess(res, { fees: enrichedFees });
   } catch (err) { next(err); }
 };
 

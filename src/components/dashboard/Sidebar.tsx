@@ -4,7 +4,7 @@ import {
   LayoutDashboard, BookOpen, Calendar, Clock, ClipboardList, 
   MessageSquare, Bell, User, LogOut, Menu, X, BarChart3, 
   Users, Layers, GraduationCap, CreditCard, BrainCircuit,
-  ChevronRight
+  ChevronRight, FileText
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../utils/cn';
@@ -26,7 +26,6 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
   const studentLinks = [
     { name: 'Dashboard', path: '/student/dashboard', icon: LayoutDashboard },
-    { name: 'My Courses', path: '/student/courses', icon: BookOpen },
     { name: 'Attendance', path: '/student/attendance', icon: Calendar },
     { name: 'Timetable', path: '/student/timetable', icon: Clock },
     { name: 'Tests', path: '/student/tests', icon: ClipboardList },
@@ -40,10 +39,10 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     { name: 'Overview', path: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Students', path: '/admin/students', icon: Users },
     { name: 'Batches', path: '/admin/batches', icon: Layers },
-    { name: 'Courses', path: '/admin/courses', icon: BookOpen },
     { name: 'Timetable', path: '/admin/timetable', icon: Clock },
     { name: 'Attendance', path: '/admin/attendance', icon: ClipboardList },
     { name: 'Tests', path: '/admin/tests', icon: BrainCircuit },
+    { name: 'Assignments', path: '/admin/assignments', icon: FileText },
     { name: 'Results', path: '/admin/results', icon: BarChart3 },
     { name: 'Fees', path: '/admin/fees', icon: CreditCard },
     { name: 'Analytics', path: '/admin/analytics', icon: GraduationCap },

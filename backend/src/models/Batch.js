@@ -7,6 +7,7 @@ const batchSchema = new mongoose.Schema(
     class: { type: String, required: true }, // e.g. "10th"
     schedule: { type: String, default: '' }, // e.g. "Mon, Wed, Fri 4-5 PM"
     teacher: { type: String, default: '' },
+    defaultFees: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

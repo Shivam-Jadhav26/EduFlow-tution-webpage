@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { 
   Search, Filter, Plus, MoreHorizontal, 
   Trash2, Edit, Eye, Download, Users,
-  CheckCircle, XCircle, Clock, Loader2, AlertCircle
+  CheckCircle, XCircle, Clock, Loader2, AlertCircle, FileText
 } from 'lucide-react';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
@@ -28,7 +28,7 @@ export const AdminStudents = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const initialForm = {
-    name: '', email: '', password: '', gender: '', class: '', batch: '', phone: '', parentName: '', parentPhone: '', status: 'active'
+    name: '', email: '', password: '', gender: '', class: '', batch: '', phone: '', parentName: '', parentPhone: '', status: 'active', fees: ''
   };
   const [formData, setFormData] = useState(initialForm);
 
@@ -111,7 +111,8 @@ export const AdminStudents = () => {
         phone: student.phone || '',
         parentName: student.parentName || '',
         parentPhone: student.parentPhone || '',
-        status: student.status || 'active'
+        status: student.status || 'active',
+        fees: student.fees !== undefined && student.fees !== null ? student.fees : ''
       });
     } else {
       setSelectedStudent(null);
@@ -123,10 +124,14 @@ export const AdminStudents = () => {
   const handleSave = async () => {
     try {
       setIsSubmitting(true);
+      const dataToSubmit = {
+        ...formData,
+        fees: formData.fees === '' ? null : Number(formData.fees)
+      };
       if (selectedStudent) {
-        await api.put(`/students/${selectedStudent._id}`, formData);
+        await api.put(`/students/${selectedStudent._id}`, dataToSubmit);
       } else {
-        await api.post('/students', formData);
+        await api.post('/students', dataToSubmit);
       }
       setShowStudentForm(false);
       setRefetchTrigger(prev => prev + 1);
@@ -191,12 +196,34 @@ export const AdminStudents = () => {
               </div>
               <div>
                 <label className="text-xs font-black uppercase text-slate-400 italic mb-1 block">Batch</label>
-                <select className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" value={formData.batch} onChange={e => setFormData({...formData, batch: e.target.value})}>
+                <select 
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" 
+                  value={formData.batch} 
+                  onChange={e => {
+                    const selectedBatchId = e.target.value;
+                    const selectedBatch = batches.find(b => b._id === selectedBatchId);
+                    setFormData(prev => ({
+                      ...prev, 
+                      batch: selectedBatchId,
+                      fees: selectedBatch ? selectedBatch.defaultFees : prev.fees
+                    }));
+                  }}
+                >
                   <option value="">Unassigned</option>
                   {batches.map(b => (
                     <option key={b._id} value={b._id}>{b.name} ({b.class})</option>
                   ))}
                 </select>
+              </div>
+              <div>
+                <label className="text-xs font-black uppercase text-slate-400 italic mb-1 block">Agreed Fees (₹)</label>
+                <input 
+                  type="number" 
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" 
+                  value={formData.fees} 
+                  onChange={e => setFormData({...formData, fees: e.target.value})} 
+                  placeholder="e.g. 500" 
+                />
               </div>
               <div>
                 <label className="text-xs font-black uppercase text-slate-400 italic mb-1 block">Parent Name</label>
@@ -278,9 +305,58 @@ export const AdminStudents = () => {
           <p className="text-slate-500 font-medium italic">Manage and track student profiles, academic status, and enrollment.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2 font-bold border-slate-200" onClick={handleExport}>
-            <Download size={18} /> Export List
+          <Button 
+            variant="outline" 
+            className="gap-2 font-bold border-slate-200" 
+            onClick={() => {
+              const csvContent = "Name,Email,Password,Class,Batch,Phone,ParentName,ParentPhone,Gender\nJohn Doe,john@example.com,EduFlow@123,10,Morning Elite,+1234567890,Jane Doe,+1234567891,male";
+              const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+              const link = document.createElement('a');
+              link.href = URL.createObjectURL(blob);
+              link.download = "student_import_template.csv";
+              link.click();
+            }}
+          >
+            <Download size={18} /> Template
           </Button>
+          <div className="relative">
+            <input 
+              type="file" 
+              className="hidden" 
+              id="student-import-file" 
+              accept=".csv,.xlsx,.xls"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                try {
+                  setLoading(true);
+                  const res = await api.post('/students/import', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                  });
+                  alert(res.data.message);
+                  setRefetchTrigger(prev => prev + 1);
+                } catch (err: any) {
+                  console.error('Import failed', err);
+                  alert(err.response?.data?.message || 'Failed to import students');
+                } finally {
+                  setLoading(false);
+                  e.target.value = ''; // Reset input
+                }
+              }}
+            />
+            <Button 
+              variant="outline" 
+              className="gap-2 font-bold border-slate-200" 
+              onClick={() => document.getElementById('student-import-file')?.click()}
+              disabled={loading}
+            >
+              {loading ? <Loader2 size={18} className="animate-spin" /> : <FileText size={18} />} Import 
+            </Button>
+          </div>
           <Button className="gap-2 font-bold shadow-lg shadow-primary/20" onClick={() => openForm()}>
             <Plus size={18} /> Enroll New Student
           </Button>

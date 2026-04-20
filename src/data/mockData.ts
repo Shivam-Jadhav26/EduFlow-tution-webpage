@@ -1,4 +1,4 @@
-import { User, Course, Test, Doubt, Notification, TimetableEntry, Attendance, FeeRecord, Result } from '../types';
+import { User, Test, Doubt, Notification, TimetableEntry, Attendance, FeeRecord, Result } from '../types';
 
 export const mockUser: User = {
   id: 'u1',
@@ -17,41 +17,6 @@ export const mockAdmin: User = {
   role: 'admin',
   avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Vivek'
 };
-
-export const courses: Course[] = [
-  {
-    id: 'c1',
-    title: 'Class 10 - Board Intensive',
-    description: 'Comprehensive coverage of CBSE Class 10 boards syllabus with previous year question solving sessions.',
-    class: '10th',
-    subjects: ['Mathematics', 'Science', 'English', 'SST'],
-    thumbnail: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=400&h=250'
-  },
-  {
-    id: 'c2',
-    title: 'Class 9 - Foundation Course',
-    description: 'Foundation course for Class 9 students focusing on core concepts needed for Class 10 and competitive exams.',
-    class: '9th',
-    subjects: ['Mathematics', 'Science', 'Social Science', 'English', 'Computer'],
-    thumbnail: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=400&h=250'
-  },
-  {
-    id: 'c3',
-    title: 'Class 8 - Skill Builder',
-    description: 'Developing analytical and logical thinking through advanced problem solving in Math and Science.',
-    class: '8th',
-    subjects: ['Mathematics', 'Science', 'English', 'Social Science'],
-    thumbnail: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=400&h=250'
-  },
-  {
-    id: 'c4',
-    title: 'Class 7 - Core Concepts',
-    description: 'Strengthening basic concepts with fun-based learning and interactive visual classes.',
-    class: '7th',
-    subjects: ['Maths', 'English', 'General Science'],
-    thumbnail: 'https://images.unsplash.com/photo-1544377193-33dcf4d68fb5?auto=format&fit=crop&q=80&w=400&h=250'
-  }
-];
 
 export const timetable: TimetableEntry[] = [
   { id: 't1', day: 'Monday', time: '04:00 PM - 05:00 PM', subject: 'Mathematics', teacher: 'Mr. Verma', batchId: 'b1' },
@@ -108,7 +73,7 @@ export const doubts: Doubt[] = [
 ];
 
 export const notifications: Notification[] = [
-  { id: 'n1', title: 'Algebra Prep Resource Update', message: 'New practice sets for Algebra have been uploaded to your course. Check My Courses section.', type: 'info', date: '2024-05-19', isRead: false },
+  { id: 'n1', title: 'Algebra Prep Resource Update', message: 'New practice sets for Algebra have been uploaded.', type: 'info', date: '2024-05-19', isRead: false },
   { id: 'n2', title: 'Maths Test Scheduled', message: 'Weekly test on Algebra scheduled for Monday at 4:30 PM.', type: 'test', date: '2024-05-18', isRead: false },
   { id: 'n3', title: 'Fee Payment Success', message: 'We have received your payment of ₹5,000 for May 2024. Transaction ID: #TXN12345.', type: 'fee', date: '2024-05-17', isRead: true },
   { id: 'n4', title: 'Holiday Announcement', message: 'The institute will remain closed on 25th May on account of regional festival.', type: 'warning', date: '2024-05-15', isRead: true }

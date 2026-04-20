@@ -45,11 +45,6 @@ export const Home = () => {
     { title: 'Result Oriented', desc: 'Proven track record of high scores in board exams.', icon: Trophy }
   ];
 
-  const defaultCourses = [
-    { grade: 10, title: 'Class 10 Foundation', desc: 'Master core subjects including Calculus basics, Organic Chemistry.', subjectsCount: 12, img: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=600&h=400' },
-    { grade: 9, title: 'Class 9 Foundation', desc: 'Build profound understanding in Mathematics and Sciences.', subjectsCount: 10, img: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=600&h=400' },
-    { grade: 8, title: 'Class 8 Core', desc: 'Step stone phase for advanced high-school dynamics.', subjectsCount: 8, img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=600&h=400' }
-  ];
 
   return (
     <div className="pt-20 transition-colors duration-300">
@@ -100,11 +95,6 @@ export const Home = () => {
                   {isAuthenticated ? 'Go to Dashboard' : 'Start Your Journey'} <ArrowRight size={20} />
                 </Button>
               </Link>
-              <a href="#courses">
-                <Button variant="outline" size="lg" className="rounded-full font-bold">
-                  Explore Courses
-                </Button>
-              </a>
             </motion.div>
 
             <motion.div 
@@ -167,37 +157,7 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* Courses Section Preview */}
-      <section id="courses" className="py-24 px-6 lg:px-12 bg-white">
-        <div className="max-w-7xl mx-auto text-center mb-16">
-          <motion.h2 {...fadeInUp} className="text-3xl lg:text-4xl font-black text-slate-900 mb-6">
-            Courses for Every Grade
-          </motion.h2>
-          <motion.p {...fadeInUp} className="text-slate-600 max-w-2xl mx-auto">
-            Our specialized curriculum is designed to help students transition from basic schooling to competitive brilliance.
-          </motion.p>
-        </div>
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          {(data?.coursesPreview || defaultCourses).map((course: any, idx: number) => (
-            <motion.div key={idx} {...fadeInUp}>
-              <Card className="group cursor-pointer">
-                <div className="aspect-video rounded-xl overflow-hidden mb-6">
-                  <img src={course.img} alt={course.title} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-                </div>
-                <h3 className="text-xl font-bold mb-3 italic">{course.title}</h3>
-                <p className="text-sm text-slate-500 mb-6 line-clamp-2">{course.desc}</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-primary font-bold">{course.subjectsCount} Subjects</span>
-                  <Link to="/contact">
-                    <Button variant="outline" size="sm" className="gap-2">Learn More <ChevronRight size={14} /></Button>
-                  </Link>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
       {/* Why Choose Us */}
       <section className="py-24 px-6 lg:px-12 bg-slate-50">

@@ -29,7 +29,7 @@ export const Footer = () => {
         <div>
           <h4 className="text-white font-bold mb-6">Quick Links</h4>
           <ul className="flex flex-col gap-4 text-sm">
-            <li><Link to="/courses" className="hover:text-primary transition-colors">All Courses</Link></li>
+
             <li><Link to="/testimonials" className="hover:text-primary transition-colors">Success Stories</Link></li>
             <li><Link to="/about" className="hover:text-primary transition-colors">Our Mission</Link></li>
             <li><Link to="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>

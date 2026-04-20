@@ -318,6 +318,7 @@ export const AdminBatches = () => {
         targetId={quickAddBatch?._id || quickAddBatch?.id}
         targetName={quickAddBatch?.name}
         targetClass={quickAddBatch?.class}
+        targetDefaultFees={quickAddBatch?.defaultFees}
         targetType="batch"
         onSuccess={() => {
           fetchBatches(); // Refresh batch strength and enrollments after adding

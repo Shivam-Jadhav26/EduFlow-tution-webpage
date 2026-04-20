@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const Batch = require('../models/Batch');
+const xlsx = require('xlsx');
 const { sendSuccess, sendError } = require('../utils/response');
 
 // GET /api/students — Admin: paginated list with filters
@@ -67,7 +69,7 @@ const getStudent = async (req, res, next) => {
 // POST /api/students — Admin creates student
 const createStudent = async (req, res, next) => {
   try {
-    const { name, email, password, gender, class: studentClass, batch, phone, parentName, parentPhone, status } = req.body;
+    const { name, email, password, gender, class: studentClass, batch, phone, parentName, parentPhone, status, fees } = req.body;
     if (!name || !email || !password) {
       return sendError(res, 'Name, email, and password are required.', 400);
     }
@@ -78,6 +80,7 @@ const createStudent = async (req, res, next) => {
       name, email, passwordHash: password,
       gender, role: 'student', class: studentClass, batch,
       phone, parentName, parentPhone, status: status || 'active',
+      fees: fees !== undefined ? Number(fees) : null,
     });
     return sendSuccess(res, { student: student.toPublic() }, 'Student created successfully.', 201);
   } catch (err) {
@@ -88,10 +91,10 @@ const createStudent = async (req, res, next) => {
 // PUT /api/students/:id
 const updateStudent = async (req, res, next) => {
   try {
-    const { name, email, gender, class: studentClass, batch, phone, parentName, parentPhone, status, avatar } = req.body;
+    const { name, email, gender, class: studentClass, batch, phone, parentName, parentPhone, status, avatar, fees } = req.body;
     const student = await User.findByIdAndUpdate(
       req.params.id,
-      { name, email, gender, class: studentClass, batch, phone, parentName, parentPhone, status, avatar },
+      { name, email, gender, class: studentClass, batch, phone, parentName, parentPhone, status, avatar, fees: fees !== undefined ? Number(fees) : null },
       { new: true, runValidators: true }
     ).populate('batch', 'name class');
 
@@ -117,4 +120,88 @@ const deleteStudent = async (req, res, next) => {
   }
 };
 
-module.exports = { getStudents, getStudentStats, getStudent, createStudent, updateStudent, deleteStudent };
+// POST /api/students/import — Admin imports students via Excel/CSV
+const importStudents = async (req, res, next) => {
+  try {
+    if (!req.file) return sendError(res, 'No file uploaded.', 400);
+
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet);
+
+    if (data.length === 0) return sendError(res, 'The uploaded file is empty.', 400);
+
+    // Prepare batches for lookup
+    const allBatches = await Batch.find({ isActive: true });
+    const batchLookup = {};
+    allBatches.forEach(b => {
+      batchLookup[b.name.toLowerCase().trim()] = b._id;
+    });
+
+    const results = {
+      success: 0,
+      failed: 0,
+      skipped: 0,
+      errors: []
+    };
+
+    const studentPromises = data.map(async (row, index) => {
+      try {
+        const name = row.Name || row.name || row['Full Name'];
+        const email = row.Email || row.email;
+        const password = row.Password || row.password || 'EduFlow@123';
+        const gender = (row.Gender || row.gender || 'other').toLowerCase();
+        const studentClass = row.Class || row.class || row.Grade || row.grade;
+        const batchName = row.Batch || row.batch;
+        const phone = row.Phone || row.phone;
+        const parentName = row.ParentName || row.parentName || row['Parent Name'];
+        const parentPhone = row.ParentPhone || row.parentPhone || row['Parent Phone'];
+
+        if (!name || !email) {
+          results.failed++;
+          results.errors.push(`Row ${index + 2}: Name and Email are required.`);
+          return;
+        }
+
+        const existing = await User.findOne({ email });
+        if (existing) {
+          results.skipped++;
+          return;
+        }
+
+        let batchId = null;
+        if (batchName) {
+          batchId = batchLookup[batchName.toLowerCase().trim()] || null;
+        }
+
+        await User.create({
+          name,
+          email,
+          passwordHash: password, // Pre-save hook will hash this
+          gender: ['male', 'female', 'other'].includes(gender) ? gender : 'other',
+          role: 'student',
+          class: studentClass || null,
+          batch: batchId,
+          phone: phone || null,
+          parentName: parentName || null,
+          parentPhone: parentPhone || null,
+          status: 'active'
+        });
+
+        results.success++;
+      } catch (err) {
+        results.failed++;
+        results.errors.push(`Row ${index + 2}: ${err.message}`);
+      }
+    });
+
+    await Promise.all(studentPromises);
+
+    return sendSuccess(res, results, `Import complete: ${results.success} added, ${results.skipped} skipped, ${results.failed} failed.`);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getStudents, getStudentStats, getStudent, createStudent, updateStudent, deleteStudent, importStudents };

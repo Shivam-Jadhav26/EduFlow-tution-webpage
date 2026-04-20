@@ -28,7 +28,8 @@ export const BatchModal: React.FC<BatchModalProps> = ({ isOpen, onClose, onSubmi
     name: '',
     class: '',
     schedule: '',
-    teacher: ''
+    teacher: '',
+    defaultFees: 0
   });
   const [loading, setLoading] = useState(false);
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -41,7 +42,8 @@ export const BatchModal: React.FC<BatchModalProps> = ({ isOpen, onClose, onSubmi
         name: initialData.name || '',
         class: initialData.class || '',
         schedule: schedule,
-        teacher: initialData.teacher || ''
+        teacher: initialData.teacher || '',
+        defaultFees: initialData.defaultFees || 0
       });
 
       // Parse schedule if it matches format "Day, Day | hh:mm Period"
@@ -62,7 +64,7 @@ export const BatchModal: React.FC<BatchModalProps> = ({ isOpen, onClose, onSubmi
         setSelectedTime({ hour: '4', min: '00', period: 'Evening' });
       }
     } else {
-      setFormData({ name: '', class: '', schedule: '', teacher: '' });
+      setFormData({ name: '', class: '', schedule: '', teacher: '', defaultFees: 0 });
       setSelectedDays([]);
       setSelectedTime({ hour: '4', min: '00', period: 'Evening' });
     }
@@ -196,6 +198,17 @@ export const BatchModal: React.FC<BatchModalProps> = ({ isOpen, onClose, onSubmi
               value={formData.teacher} 
               onChange={e => setFormData({...formData, teacher: e.target.value})} 
               placeholder="e.g. John Doe"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-500 uppercase italic">Default Batch Fees (₹)</label>
+            <Input 
+              type="number"
+              value={formData.defaultFees} 
+              onChange={e => setFormData({...formData, defaultFees: Number(e.target.value)})} 
+              placeholder="e.g. 500"
+              required
             />
           </div>
 

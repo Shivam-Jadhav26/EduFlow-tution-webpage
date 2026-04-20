@@ -66,7 +66,7 @@ export const Contact = () => {
             transition={{ delay: 0.2 }}
             className="text-slate-600 text-lg max-w-2xl mx-auto"
           >
-            Have questions about admissions, courses, or fees? Our academic counselors are here to help you find the perfect learning path for your child.
+            Have questions about admissions or fees? Our academic counselors are here to help you find the perfect learning path for your child.
           </motion.p>
         </div>
       </section>
@@ -214,8 +214,7 @@ export const Contact = () => {
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: 'Student Login', to: '/login' },
-                  { label: 'Register Now', to: '/register' },
-                  { label: 'View Courses', to: '/#courses' },
+                  { label: 'Our Teachers', to: '/team' },
                   { label: 'Our Results', to: '/testimonials' },
                 ].map((link, i) => (
                   <Link key={i} to={link.to} className="flex items-center gap-2 text-sm font-bold text-primary hover:underline">

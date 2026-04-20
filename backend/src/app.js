@@ -6,7 +6,6 @@ const errorHandler = require('./middlewares/errorHandler');
 // Route imports
 const authRoutes = require('./routes/auth');
 const studentRoutes = require('./routes/students');
-const courseRoutes = require('./routes/courses');
 const batchRoutes = require('./routes/batches');
 const timetableRoutes = require('./routes/timetable');
 const attendanceRoutes = require('./routes/attendance');
@@ -59,7 +58,6 @@ app.get('/api/health', (req, res) => {
 // ── API Routes ────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
-app.use('/api/courses', courseRoutes);
 app.use('/api/batches', batchRoutes);
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/attendance', attendanceRoutes);

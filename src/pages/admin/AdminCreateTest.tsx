@@ -28,7 +28,6 @@ export const AdminCreateTest = () => {
     time: '10:00',
     duration: 60,
     totalMarks: 50,
-    class: '10',
     targetBatches: [] as string[]
   });
 
@@ -120,7 +119,6 @@ export const AdminCreateTest = () => {
         date: finalDate,
         duration: Number(formData.duration),
         totalMarks: Number(formData.totalMarks),
-        class: formData.class,
         targetBatches: formData.targetBatches,
         questions: questions.map(q => ({
           text: q.text,
@@ -201,25 +199,7 @@ export const AdminCreateTest = () => {
                   onChange={(e) => handleChange('totalMarks', e.target.value)}
                 />
               </div>
-              <div className="space-y-1.5 flex flex-col">
-                <label className="text-sm font-semibold text-slate-700 italic">Class/Grade Scope</label>
-                <div className="flex flex-wrap gap-2">
-                  {['8', '9', '10', '11', '12'].map(grade => (
-                    <button 
-                      key={grade} 
-                      onClick={() => handleChange('class', grade)}
-                      className={cn(
-                        "flex-1 py-1.5 border-2 rounded-lg text-xs font-black transition-all",
-                        formData.class === grade 
-                          ? "border-primary text-primary bg-primary/5" 
-                          : "border-slate-100 text-slate-500 hover:border-slate-300"
-                      )}
-                    >
-                      CL {grade}
-                    </button>
-                  ))}
-                </div>
-              </div>
+
             </div>
           </Card>
 
@@ -377,7 +357,7 @@ export const AdminCreateTest = () => {
               
               <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                 <AlertCircle size={18} className="text-amber-500 shrink-0" />
-                <p className="text-[10px] text-slate-500 font-semibold italic">Students mapped by class or explicitly selected batches will be evaluated.</p>
+                <p className="text-[10px] text-slate-500 font-semibold italic">Students explicitly selected via batches will be evaluated.</p>
               </div>
             </div>
           </Card>

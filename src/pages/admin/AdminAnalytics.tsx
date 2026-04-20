@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, LineChart, Line,
@@ -6,37 +7,61 @@ import {
 import {
   TrendingUp, Users, BookOpen, Clock,
   Target, Zap, Award, ArrowUpRight,
-  ArrowDownRight, Filter, Download
+  ArrowDownRight, Filter, Download,
+  Loader2, AlertCircle
 } from 'lucide-react';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { cn } from '../../utils/cn';
-
-const performanceTrends = [
-  { month: 'Jan', math: 65, science: 72, english: 88 },
-  { month: 'Feb', math: 70, science: 75, english: 85 },
-  { month: 'Mar', math: 68, science: 80, english: 90 },
-  { month: 'Apr', math: 85, science: 85, english: 82 },
-  { month: 'May', math: 78, science: 92, english: 95 },
-];
-
-const batchPerformance = [
-  { batch: 'Batch A', avg: 85, top: 98 },
-  { batch: 'Batch B', avg: 72, top: 92 },
-  { batch: 'Batch C', avg: 78, top: 88 },
-  { batch: 'Batch D', avg: 65, top: 85 },
-];
-
-const dropOutRisk = [
-  { name: 'Low Risk', value: 240 },
-  { name: 'Medium Risk', value: 45 },
-  { name: 'High Risk', value: 15 },
-];
+import api from '../../services/api';
 
 const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
 
 export const AdminAnalytics = () => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get('/analytics');
+        setData(res.data.data);
+      } catch (err: any) {
+        console.error('Failed to fetch analytics:', err);
+        setError('Failed to load real-time analytics data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalytics();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <p className="text-slate-500 font-black italic animate-pulse">Syncing Institute Intelligence...</p>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <Card className="p-12 text-center border-dashed border-2 border-slate-200">
+        <div className="bg-red-50 text-red-500 p-4 rounded-2xl w-fit mx-auto mb-6">
+          <AlertCircle size={48} />
+        </div>
+        <h2 className="text-xl font-black italic text-slate-900 mb-2">Analytics Disconnected</h2>
+        <p className="text-slate-500 font-medium mb-6">{error || 'Unable to retrieve data from intelligence cluster.'}</p>
+        <Button onClick={() => window.location.reload()} className="font-bold italic">Retry Connection</Button>
+      </Card>
+    );
+  }
+
+  const { kpis, subjectTrends, batchPerformance, dropoutRisk } = data;
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Header */}
@@ -65,7 +90,7 @@ export const AdminAnalytics = () => {
             <Badge variant="success" className="italic">+18.5% YoY</Badge>
           </div>
           <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Retention Rate</p>
-          <h3 className="text-3xl font-black text-slate-900">94.2%</h3>
+          <h3 className="text-3xl font-black text-slate-900">{kpis.retentionRate}%</h3>
           <p className="text-[10px] text-slate-400 font-medium mt-2 italic">Based on active enrollment cycles</p>
         </Card>
 
@@ -77,7 +102,7 @@ export const AdminAnalytics = () => {
             <Badge variant="primary" className="italic">On Track</Badge>
           </div>
           <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Average Test Score</p>
-          <h3 className="text-3xl font-black text-slate-900">78.5<span className="text-lg text-slate-400">/100</span></h3>
+          <h3 className="text-3xl font-black text-slate-900">{kpis.avgTestScore}<span className="text-lg text-slate-400">/100</span></h3>
           <p className="text-[10px] text-slate-400 font-medium mt-2 italic">Aggregated across all active batches</p>
         </Card>
 
@@ -89,7 +114,7 @@ export const AdminAnalytics = () => {
             <Badge variant="secondary" className="italic">Top 5%</Badge>
           </div>
           <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Student Engagement</p>
-          <h3 className="text-3xl font-black text-slate-900">8.4<span className="text-lg text-slate-400">/10</span></h3>
+          <h3 className="text-3xl font-black text-slate-900">{kpis.engagementScore}<span className="text-lg text-slate-400">/10</span></h3>
           <p className="text-[10px] text-slate-400 font-medium mt-2 italic">Daily active platform usage metrics</p>
         </Card>
       </div>
@@ -99,7 +124,7 @@ export const AdminAnalytics = () => {
         <Card className="lg:col-span-2" title="Subject Performance Trends" description="Monthly average scores across core subjects">
           <div className="h-[350px] w-full pt-6">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={performanceTrends}>
+              <AreaChart data={subjectTrends}>
                 <defs>
                   <linearGradient id="colorMath" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#0d9488" stopOpacity={0.1} />
@@ -128,7 +153,7 @@ export const AdminAnalytics = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={dropOutRisk}
+                  data={dropoutRisk}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -136,7 +161,7 @@ export const AdminAnalytics = () => {
                   paddingAngle={8}
                   dataKey="value"
                 >
-                  {dropOutRisk.map((entry, index) => (
+                  {dropoutRisk.map((entry: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -145,7 +170,7 @@ export const AdminAnalytics = () => {
             </ResponsiveContainer>
           </div>
           <div className="space-y-4 mt-6">
-            {dropOutRisk.map((item, i) => (
+            {dropoutRisk.map((item: any, i: number) => (
               <div key={i} className="flex items-center justify-between group cursor-default">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i] }} />
@@ -154,7 +179,7 @@ export const AdminAnalytics = () => {
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-black text-slate-900">{item.value} stds</span>
                   <div className="w-12 h-1 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full" style={{ width: `${(item.value / 300) * 100}%`, backgroundColor: COLORS[i] }} />
+                    <div className="h-full" style={{ width: `${Math.min(100, (item.value / (kpis.totalStudents || 100)) * 100)}%`, backgroundColor: COLORS[i] }} />
                   </div>
                 </div>
               </div>
