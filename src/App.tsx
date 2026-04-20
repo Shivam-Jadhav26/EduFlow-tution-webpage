@@ -21,6 +21,7 @@ import { StudentTests } from './pages/student/StudentTests';
 import { StudentDoubts } from './pages/student/StudentDoubts';
 import { StudentNotifications } from './pages/student/StudentNotifications';
 import { StudentProfile } from './pages/student/StudentProfile';
+import { StudentAssignments } from './pages/student/StudentAssignments';
 
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminStudents } from './pages/admin/AdminStudents';
@@ -34,6 +35,7 @@ import { AdminFees } from './pages/admin/AdminFees';
 import { AdminAnalytics } from './pages/admin/AdminAnalytics';
 import { AdminNotifications } from './pages/admin/AdminNotifications';
 import { AdminDoubts } from './pages/admin/AdminDoubts';
+import { AdminAssignments } from './pages/admin/AdminAssignments';
 
 // Temporary components for pages not yet built fully
 const Placeholder = ({ name }: { name: string }) => (
@@ -77,6 +79,7 @@ export default function App() {
               <Route path="results" element={<StudentResults />} />
               <Route path="fees" element={<StudentFees />} />
               <Route path="doubts" element={<StudentDoubts />} />
+              <Route path="assignments" element={<StudentAssignments />} />
               <Route path="notifications" element={<StudentNotifications />} />
               <Route path="profile" element={<StudentProfile />} />
               <Route index element={<Navigate to="dashboard" replace />} />
@@ -94,7 +97,7 @@ export default function App() {
               <Route path="tests" element={<AdminTests />} />
               <Route path="tests/create" element={<AdminCreateTest />} />
               <Route path="tests/edit/:id" element={<AdminCreateTest />} />
-              <Route path="assignments" element={<Placeholder name="Assignments" />} />
+              <Route path="assignments" element={<AdminAssignments />} />
               <Route path="results" element={<AdminResults />} />
               <Route path="fees" element={<AdminFees />} />
               <Route path="analytics" element={<AdminAnalytics />} />

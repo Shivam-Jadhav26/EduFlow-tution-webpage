@@ -18,6 +18,8 @@ const announcementRoutes = require('./routes/announcements');
 const analyticsRoutes = require('./routes/analytics');
 const dashboardRoutes = require('./routes/dashboard');
 const aiRoutes = require('./routes/ai');
+const assignmentRoutes = require('./routes/assignments');
+const sourceRoutes = require('./routes/sources');
 
 const app = express();
 
@@ -70,6 +72,8 @@ app.use('/api/announcements', announcementRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/assignments', assignmentRoutes);
+app.use('/api/sources', sourceRoutes);
 
 // ── 404 Fallback ──────────────────────────────────────────────────────────────
 app.use((req, res) => {

@@ -29,6 +29,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     { name: 'Attendance', path: '/student/attendance', icon: Calendar },
     { name: 'Timetable', path: '/student/timetable', icon: Clock },
     { name: 'Tests', path: '/student/tests', icon: ClipboardList },
+    { name: 'Assignments', path: '/student/assignments', icon: FileText },
     { name: 'Results', path: '/student/results', icon: BarChart3 },
     { name: 'Doubts', path: '/student/doubts', icon: MessageSquare },
     { name: 'Notifications', path: '/student/notifications', icon: Bell },
