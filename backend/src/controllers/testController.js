@@ -3,9 +3,38 @@ const TestAttempt = require('../models/TestAttempt');
 const User = require('../models/User');
 const { sendSuccess, sendError } = require('../utils/response');
 
+const syncTestStatuses = async () => {
+  try {
+    const activeTests = await Test.find({ status: { $in: ['upcoming', 'ongoing'] } });
+    const now = new Date();
+    
+    for (const test of activeTests) {
+      if (!test.date || !test.duration) continue;
+      
+      const testStart = new Date(test.date);
+      const testEnd = new Date(testStart.getTime() + test.duration * 60000);
+      
+      let newStatus = test.status;
+      if (now > testEnd) {
+        newStatus = 'completed';
+      } else if (now >= testStart && test.status === 'upcoming') {
+        newStatus = 'ongoing';
+      }
+      
+      if (newStatus !== test.status) {
+        test.status = newStatus;
+        await test.save();
+      }
+    }
+  } catch(err) {
+    console.error('Failed to sync test statuses', err);
+  }
+};
+
 // GET /api/tests/dashboard
 const getTestDashboardStats = async (req, res, next) => {
   try {
+    await syncTestStatuses();
     const totalPublished = await Test.countDocuments({ status: { $ne: 'draft' } });
     const evaluationPending = await Test.countDocuments({ status: 'draft' });
     const totalSubmissions = await TestAttempt.countDocuments({ status: 'submitted' });
@@ -32,6 +61,7 @@ const getTestSubmissions = async (req, res, next) => {
 // GET /api/tests
 const getTests = async (req, res, next) => {
   try {
+    await syncTestStatuses();
     const query = {};
 
     if (req.user.role === 'student') {
@@ -71,6 +101,7 @@ const getTests = async (req, res, next) => {
 // GET /api/tests/:id
 const getTest = async (req, res, next) => {
   try {
+    await syncTestStatuses();
     const test = await Test.findById(req.params.id)
       .populate('targetBatches', 'name')
       .populate('createdBy', 'name');
@@ -87,6 +118,9 @@ const getTest = async (req, res, next) => {
       }
       if (test.status === 'completed') {
         return sendError(res, 'This test is no longer available.', 403);
+      }
+      if (test.status === 'upcoming') {
+        return sendError(res, 'This test has not started yet.', 403);
       }
     }
 

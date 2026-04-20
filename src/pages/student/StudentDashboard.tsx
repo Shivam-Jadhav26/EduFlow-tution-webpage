@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { 
   Users, BookOpen, Clock, Calendar, CheckCircle2, 
   TrendingUp, Play, FileText, ChevronRight, Award,
-  MessageSquare, ClipboardList, BrainCircuit, AlertCircle
+  MessageSquare, ClipboardList, BrainCircuit, AlertCircle, Lock
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, 
@@ -57,6 +57,25 @@ export const StudentDashboard = () => {
         <h2 className="text-xl font-black text-slate-900 mb-2 italic">Oops! Something went wrong</h2>
         <p className="text-slate-600 mb-6 font-medium">{error}</p>
         <Button onClick={() => window.location.reload()} className="font-bold">Try Refreshing</Button>
+      </div>
+    );
+  }
+
+  const isUnassigned = !user?.batch || user?.batch === 'Unassigned Batch' || (typeof user?.batch === 'object' && user?.batch?.name === 'Unassigned Batch');
+
+  if (isUnassigned) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center max-w-lg mx-auto px-4 mt-8">
+        <div className="bg-orange-50 text-orange-500 p-6 rounded-[2rem] mb-2 shadow-inner border border-orange-100">
+           <Lock size={64} />
+        </div>
+        <h1 className="text-3xl md:text-4xl font-black text-slate-900 italic uppercase">Access Restricted</h1>
+        <p className="text-slate-600 font-medium text-lg leading-relaxed">
+          You are not assigned to any batch yet. Please contact your administrator to complete your enrollment and unlock your dashboard materials.
+        </p>
+        <div className="flex gap-4 mt-4">
+          <Button onClick={() => window.location.reload()} size="lg" className="font-bold rounded-xl shadow-lg hover:shadow-xl transition-all">Check Current Status</Button>
+        </div>
       </div>
     );
   }

@@ -15,7 +15,7 @@ const getAdminDashboard = async (req, res, next) => {
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today.getTime() + 86400000);
 
-    const [totalStudents, totalBatches, pendingFees, todayAttendance, allStudents, unresolvedDoubts] = await Promise.all([
+    const [totalStudents, totalBatches, pendingFees, todayAttendance, allStudents, unresolvedDoubts, unassignedCount, recentlyRegistered] = await Promise.all([
       User.countDocuments({ role: 'student', status: 'active' }),
       Batch.countDocuments({ isActive: true }),
       FeeRecord.aggregate([
@@ -25,6 +25,8 @@ const getAdminDashboard = async (req, res, next) => {
       Attendance.countDocuments({ date: { $gte: today, $lt: tomorrow }, status: { $ne: 'absent' } }),
       User.countDocuments({ role: 'student', status: 'active' }),
       Doubt.countDocuments({ status: 'pending' }),
+      User.countDocuments({ role: 'student', $or: [{ batch: null }, { batch: { $exists: false } }] }),
+      User.find({ role: 'student' }).sort({ createdAt: -1 }).limit(5).select('name email class createdAt status phone batch'),
     ]);
 
     const todayPct = allStudents > 0 ? Math.round((todayAttendance / allStudents) * 100) : 0;
@@ -88,10 +90,12 @@ const getAdminDashboard = async (req, res, next) => {
         pendingFees: `₹${(pendingFees[0]?.total || 0).toLocaleString()}`,
         todayAttendance: `${todayPct}%`,
         unresolvedDoubts,
+        unassignedCount,
         studentChange,
         feeChange,
         attendanceChange
       },
+      recentlyRegistered,
       enrollmentTrend: enrollmentData, // Match frontend expected shape natively
       feeCollections, 
       classDistribution: classDistrib.map((c) => ({ name: `Class ${c._id}`, value: c.value })),

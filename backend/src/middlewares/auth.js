@@ -41,4 +41,16 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
-module.exports = { protect, adminOnly };
+/**
+ * Restrict to users who are assigned to a valid batch
+ */
+const requireBatch = (req, res, next) => {
+  if (req.user && req.user.role === 'student') {
+    if (!req.user.batch || req.user.batch === 'Unassigned Batch' || req.user.batch.name === 'Unassigned Batch') {
+      return sendError(res, 'You are not assigned to any batch yet. Please contact admin.', 403);
+    }
+  }
+  next();
+};
+
+module.exports = { protect, adminOnly, requireBatch };

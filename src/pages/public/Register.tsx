@@ -20,8 +20,7 @@ export const Register = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    grade: '',
-    batch: ''
+    grade: ''
   });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -55,8 +54,7 @@ export const Register = () => {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        class: formData.grade,
-        batch: formData.batch,
+        class: formData.grade
       };
 
       await api.post('/auth/register', payload);
@@ -203,20 +201,7 @@ export const Register = () => {
                   </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700 italic">Preferred Batch</label>
-                  <select 
-                    name="batch"
-                    value={formData.batch}
-                    onChange={handleChange}
-                    className="flex h-12 w-full rounded-xl border-2 border-slate-100 bg-white px-3 py-2 text-sm font-medium focus:outline-none focus:border-primary"
-                  >
-                    <option value="">Select Batch</option>
-                    <option value="morning">Morning Elite (7:00 AM - 9:00 AM)</option>
-                    <option value="evening">Evening Starters (4:00 PM - 6:00 PM)</option>
-                    <option value="weekend">Weekend Intensive</option>
-                  </select>
-                </div>
+
 
                 <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
                   <div className="flex gap-3">

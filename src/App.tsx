@@ -93,6 +93,7 @@ export default function App() {
               <Route path="attendance" element={<AdminAttendance />} />
               <Route path="tests" element={<AdminTests />} />
               <Route path="tests/create" element={<AdminCreateTest />} />
+              <Route path="tests/edit/:id" element={<AdminCreateTest />} />
               <Route path="assignments" element={<Placeholder name="Assignments" />} />
               <Route path="results" element={<AdminResults />} />
               <Route path="fees" element={<AdminFees />} />

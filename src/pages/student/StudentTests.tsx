@@ -75,11 +75,17 @@ export const StudentTests = () => {
                       <Calendar size={14} />
                       <span>{test.questions?.length || 0} Questions • {test.totalMarks} Marks</span>
                     </div>
-                    <Link to={`/student/tests/${test._id}`}>
-                      <Button className="w-full gap-2 font-black italic rounded-xl group-hover:bg-slate-900 group-hover:text-white transition-all">
-                        <Play size={16} fill="currentColor" /> Start Test
+                    {test.status === 'upcoming' ? (
+                      <Button disabled className="w-full gap-2 font-black italic rounded-xl bg-slate-100 text-slate-400 border-none cursor-not-allowed">
+                        <Clock size={16} /> Starts at {new Date(test.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'})}
                       </Button>
-                    </Link>
+                    ) : (
+                      <Link to={`/student/tests/${test._id}`}>
+                        <Button className="w-full gap-2 font-black italic rounded-xl group-hover:bg-slate-900 group-hover:text-white transition-all">
+                          <Play size={16} fill="currentColor" /> Start Test
+                        </Button>
+                      </Link>
+                    )}
                   </Card>
                 ))}
               </div>

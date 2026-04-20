@@ -67,6 +67,15 @@ export const AdminTests = () => {
     }
   };
 
+  const handlePublish = async (id: string) => {
+    try {
+      await api.put(`/tests/${id}`, { status: 'upcoming' });
+      setRefetchTrigger(p => p + 1);
+    } catch(err) {
+      alert("Failed to publish test.");
+    }
+  };
+
   const openSubmissions = async (test: any) => {
     setActiveTestForSub(test);
     setShowSubModal(true);
@@ -240,6 +249,14 @@ export const AdminTests = () => {
                   <h3 className="text-xl font-bold text-slate-900 mt-2">{test.title}</h3>
                 </div>
                 <div className="flex gap-2">
+                  {test.status === 'draft' && (
+                    <>
+                      <Link to={`/admin/tests/edit/${test._id}`}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-blue-50 hover:text-blue-500 transition-all text-slate-300"><Edit2 size={16} /></Button>
+                      </Link>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-emerald-50 hover:text-emerald-500 transition-all text-slate-300" onClick={() => handlePublish(test._id)}><Play size={16} /></Button>
+                    </>
+                  )}
                   <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-red-50 hover:text-red-500 transition-all text-slate-300" onClick={() => handleDelete(test._id)}><Trash2 size={16} /></Button>
                 </div>
               </div>

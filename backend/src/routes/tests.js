@@ -1,10 +1,11 @@
 const express = require('express');
-const { protect, adminOnly } = require('../middlewares/auth');
+const { protect, adminOnly, requireBatch } = require('../middlewares/auth');
 const { getTests, getTest, createTest, updateTest, deleteTest, submitTest, getTestDashboardStats, getTestSubmissions } = require('../controllers/testController');
 
 const router = express.Router();
 
 router.use(protect);
+router.use(requireBatch);
 router.get('/dashboard', adminOnly, getTestDashboardStats);
 router.get('/', getTests);
 router.get('/:id', getTest);

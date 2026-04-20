@@ -4,7 +4,7 @@ import {
   ChevronLeft, Settings, BrainCircuit,
   PlusCircle, Loader2
 } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
@@ -15,6 +15,7 @@ import api from '../../services/api';
 
 export const AdminCreateTest = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   
   const [batches, setBatches] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
@@ -48,6 +49,39 @@ export const AdminCreateTest = () => {
     };
     fetchBatches();
   }, []);
+
+  useEffect(() => {
+    if (id) {
+      api.get(`/tests/${id}`).then(res => {
+        const t = res.data.data.test;
+        const localDate = new Date(t.date);
+        localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
+        const [d, tPart] = localDate.toISOString().split('T');
+
+        setFormData({
+          title: t.title,
+          subject: t.subject,
+          date: d,
+          time: tPart.substring(0, 5),
+          duration: t.duration,
+          totalMarks: t.totalMarks,
+          targetBatches: t.targetBatches.map((b: any) => b._id || b)
+        });
+        
+        if (t.questions && t.questions.length > 0) {
+          setQuestions(t.questions.map((q: any) => ({
+            id: q._id || Date.now() + Math.random(),
+            text: q.text,
+            options: q.options,
+            correctAnswer: q.correctAnswer
+          })));
+        }
+      }).catch(err => {
+        console.error(err);
+        alert('Failed to load existing test');
+      });
+    }
+  }, [id]);
 
   const handleChange = (field: string, value: any) => setFormData(p => ({ ...p, [field]: value }));
 
@@ -128,7 +162,11 @@ export const AdminCreateTest = () => {
         status
       };
       
-      await api.post('/tests', payload);
+      if (id) {
+        await api.put(`/tests/${id}`, payload);
+      } else {
+        await api.post('/tests', payload);
+      }
       navigate('/admin/tests');
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to save test');
@@ -146,7 +184,7 @@ export const AdminCreateTest = () => {
             <Button variant="ghost" size="icon" className="rounded-xl"><ChevronLeft size={24} /></Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 italic">Create Assessment</h1>
+            <h1 className="text-2xl font-black text-slate-900 italic">{id ? 'Edit Assessment' : 'Create Assessment'}</h1>
             <p className="text-slate-500 font-medium italic">Design a board-pattern or custom MCQ test.</p>
           </div>
         </div>
@@ -340,6 +378,23 @@ export const AdminCreateTest = () => {
                 )}
               </div>
               
+              <div className="flex justify-between items-end pb-1 border-b border-slate-100">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-tighter">Timing Configuration</label>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    const now = new Date();
+                    // offset for local timezone
+                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                    const [datePart, timePart] = now.toISOString().split('T');
+                    handleChange('date', datePart);
+                    handleChange('time', timePart.substring(0, 5));
+                  }}
+                  className="text-[10px] font-black text-primary bg-primary/10 px-2 py-1 rounded-full hover:bg-primary/20 transition-all uppercase"
+                >
+                  Start Immediately
+                </button>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <Input 
                   label="Scheduled Date" 

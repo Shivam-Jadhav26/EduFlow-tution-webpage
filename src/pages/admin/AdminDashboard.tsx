@@ -64,6 +64,7 @@ export const AdminDashboard = () => {
 
   const kpis = [
     { label: 'Total Students', val: data.kpis.totalStudents.toString(), change: data.kpis.studentChange, up: data.kpis.studentChange?.startsWith('+'), icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: 'Unassigned Students', val: data.kpis.unassignedCount.toString(), change: 'Requires Action', up: false, icon: AlertCircle, color: 'text-orange-600', bg: 'bg-orange-50' },
     { label: 'Total Batches', val: data.kpis.totalBatches.toString(), change: 'Stable', up: true, icon: Layers, color: 'text-blue-600', bg: 'bg-blue-50' },
     { label: 'Pending Fees', val: data.kpis.pendingFees, change: data.kpis.feeChange, up: !data.kpis.feeChange?.startsWith('-'), icon: CreditCard, color: 'text-red-600', bg: 'bg-red-50' },
     { label: 'Today Attendance', val: data.kpis.todayAttendance, change: data.kpis.attendanceChange, up: data.kpis.attendanceChange?.startsWith('+'), icon: ClipboardList, color: 'text-emerald-600', bg: 'bg-emerald-50' },
@@ -88,7 +89,7 @@ export const AdminDashboard = () => {
       </div>
 
       {/* KPI Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         {kpis.map((kpi, i) => (
           <Card key={i} className="p-0">
             <div className="p-6">
@@ -170,6 +171,31 @@ export const AdminDashboard = () => {
                 <span className="text-slate-900">{item.value} stds</span>
               </div>
             ))}
+          </div>
+        </Card>
+        
+        {/* Recently Registered Students */}
+        <Card className="lg:col-span-1" title="Recently Registered" description="Latest students joining EduFlow">
+          <div className="space-y-4 pt-2">
+            {(data.recentlyRegistered || []).map((student: any, i: number) => (
+              <div key={i} className="flex justify-between items-center p-3 rounded-xl border border-slate-50 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase cursor-default">
+                    {student.name.substring(0,2)}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 italic line-clamp-1">{student.name}</h4>
+                    <p className="text-[10px] text-slate-500 font-medium">Class {student.class}</p>
+                  </div>
+                </div>
+                <Badge variant={student.batch ? 'success' : 'warning'} className="text-[9px] uppercase px-2 shrink-0">
+                  {student.batch ? 'Assigned' : 'Unassigned'}
+                </Badge>
+              </div>
+            ))}
+            {!data.recentlyRegistered?.length && (
+               <p className="text-center text-sm font-medium text-slate-400 py-6 italic">No recent registrations.</p>
+            )}
           </div>
         </Card>
       </div>
