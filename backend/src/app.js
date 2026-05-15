@@ -61,17 +61,16 @@ app.use('/api/auth/register', authLimiter);
 // ── CORS ──────────────────────────────────────────────────────────────────────
 const allowedOrigins = (process.env.CLIENT_URL || process.env.FRONTEND_URL || 'http://localhost:5173')
   .split(',')
-  .map((o) => o.trim());
+  .map((o) => o.trim().replace(/\/$/, '')); // Remove trailing slash
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // In production, reject requests with no origin
-      // In development, allow no-origin requests (curl, Postman)
-      if (!origin && !isProd) {
-        return callback(null, true);
-      }
-      if (allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // Allow if it matches the explicitly configured origins or if it's a vercel domain
+      if (allowedOrigins.includes(origin) || origin.includes('vercel.app')) {
         callback(null, true);
       } else {
         callback(new Error(`CORS policy: origin ${origin} not allowed`));
