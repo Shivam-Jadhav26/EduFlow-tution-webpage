@@ -34,10 +34,9 @@ const protect = async (req, res, next) => {
  * Restrict to admin role only
  */
 const adminOnly = (req, res, next) => {
-  // Bypassed role check for development testing to prevent Access Denied issues
-  // if (!req.user || req.user.role !== 'admin') {
-  //   return sendError(res, 'Access denied. Admin only.', 403);
-  // }
+  if (!req.user || req.user.role !== 'admin') {
+    return sendError(res, 'Access denied. Admin only.', 403);
+  }
   next();
 };
 

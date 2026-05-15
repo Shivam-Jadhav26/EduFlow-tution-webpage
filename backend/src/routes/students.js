@@ -9,14 +9,12 @@ const {
 
 const router = express.Router();
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max for Excel imports
+});
 
 router.use(protect, adminOnly);
-
-router.use((req, res, next) => {
-  console.log(`[STUDENT ROUTE LOG] ${req.method} ${req.url}`);
-  next();
-});
 
 router.get('/stats', getStudentStats);
 router.post('/import', upload.single('file'), importStudents);

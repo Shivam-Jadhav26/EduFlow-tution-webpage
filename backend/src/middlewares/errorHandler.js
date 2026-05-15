@@ -2,9 +2,14 @@ const { sendError } = require('../utils/response');
 
 /**
  * Global error handler middleware
+ * In production, generic messages are sent for 500 errors to avoid leaking internals.
  */
 const errorHandler = (err, req, res, next) => {
+  // Always log the full error server-side
   console.error('❌ Error:', err.message);
+  if (process.env.NODE_ENV !== 'production') {
+    console.error(err.stack);
+  }
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {
@@ -28,9 +33,18 @@ const errorHandler = (err, req, res, next) => {
     return sendError(res, 'Invalid token.', 401);
   }
 
-  // Default
+  // Token expired
+  if (err.name === 'TokenExpiredError') {
+    return sendError(res, 'Token expired. Please log in again.', 401);
+  }
+
+  // Default — hide internal details in production
   const statusCode = err.statusCode || 500;
-  return sendError(res, err.message || 'Internal server error', statusCode);
+  const message = statusCode === 500 && process.env.NODE_ENV === 'production'
+    ? 'Internal server error'
+    : err.message || 'Internal server error';
+
+  return sendError(res, message, statusCode);
 };
 
 module.exports = errorHandler;

@@ -93,7 +93,7 @@ export const StudentDashboard = () => {
       {/* Welcome Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 italic">Welcome back, {user?.name.split(' ')[0]}! 👋</h1>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white italic">Welcome back, {user?.name.split(' ')[0]}! 👋</h1>
           <p className="text-slate-500 font-medium">Here's what's happening with your studies today.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -111,8 +111,8 @@ export const StudentDashboard = () => {
                 <stat.icon size={24} />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-tighter">{stat.label}</p>
-                <p className="text-2xl font-black text-slate-900">{stat.val}</p>
+                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tighter">{stat.label}</p>
+                <p className="text-2xl font-black text-slate-900 dark:text-white">{stat.val}</p>
               </div>
             </div>
           </Card>
@@ -163,7 +163,7 @@ export const StudentDashboard = () => {
         <Card title="Smart Suggestions" description="AI insights based on your recent performance">
           <div className="space-y-4">
             {(data.recommendations || []).map((s: any, i: number) => (
-              <div key={i} className="group p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/20 transition-all cursor-pointer">
+              <div key={i} className="group p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 hover:border-primary/20 dark:hover:border-primary/50 transition-all cursor-pointer">
                 <div className="flex gap-4">
                   <div className={cn("p-2 rounded-lg shrink-0", 
                     s.type === 'High' ? 'bg-red-50 text-red-600' : 
@@ -173,7 +173,7 @@ export const StudentDashboard = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-bold text-slate-900 text-sm italic">{s.title}</h4>
+                      <h4 className="font-bold text-slate-900 dark:text-white text-sm italic">{s.title}</h4>
                       <Badge variant={s.type === 'High' ? 'error' : s.type === 'Med' ? 'warning' : 'success'} className="text-[10px] scale-90">{s.type}</Badge>
                     </div>
                     <p className="text-xs text-slate-500 font-medium">{s.desc}</p>
@@ -195,9 +195,9 @@ export const StudentDashboard = () => {
         <Card className="lg:col-span-3" title="Quick Test History" description="Recent assessment outcomes">
            <div className="space-y-4 pt-2">
               {(data.recentResults || []).map((res: any, i: number) => (
-                <div key={i} className="flex justify-between items-center p-3 rounded-xl border border-slate-50 bg-slate-50/30 italic">
+                <div key={i} className="flex justify-between items-center p-3 rounded-xl border border-slate-50 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-800/30 italic">
                   <div>
-                    <p className="text-sm font-bold text-slate-800 leading-none mb-1">{res.test || 'Test'}</p>
+                    <p className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-none mb-1">{res.test || 'Test'}</p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{new Date(res.date).toLocaleDateString()}</p>
                   </div>
                   <div className="text-right">
@@ -220,11 +220,11 @@ export const StudentDashboard = () => {
         <Card title="Upcoming Classes" description="Next 24 hours schedule">
           <div className="space-y-4">
             {(data.upcomingClasses || []).map((cls: any, i: number) => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 italic">
+              <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-700 italic">
                 <div className="flex items-center gap-3">
-                  <div className="bg-slate-100 p-2 rounded-lg"><Clock size={16} className="text-slate-500" /></div>
+                  <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-lg"><Clock size={16} className="text-slate-500 dark:text-slate-400" /></div>
                   <div>
-                    <p className="text-sm font-bold text-slate-900">{cls.subject}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">{cls.subject}</p>
                     <p className="text-xs text-slate-500 font-medium">{cls.teacher} • {cls.time}</p>
                   </div>
                 </div>
@@ -266,7 +266,7 @@ export const StudentDashboard = () => {
         <Card title="Pending Obligations" description="Prioritized items for this week">
           <div className="space-y-4">
             {(data.tasks || []).map((t: any, i: number) => (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
                 <div className={cn(
                   "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
                   t.done ? "bg-emerald-500 border-emerald-500" : "border-slate-200 group-hover:border-primary"
@@ -274,7 +274,7 @@ export const StudentDashboard = () => {
                   {t.done && <CheckCircle2 size={12} className="text-white" />}
                 </div>
                 <div className="flex-1">
-                  <p className={cn("text-sm font-bold", t.done ? "text-slate-400 line-through" : "text-slate-700")}>{t.task}</p>
+                  <p className={cn("text-sm font-bold", t.done ? "text-slate-400 dark:text-slate-500 line-through" : "text-slate-700 dark:text-slate-200")}>{t.task}</p>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{t.due === 'Done' ? 'Completed' : `Due: ${t.due}`}</p>
                 </div>
               </div>

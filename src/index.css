@@ -25,10 +25,65 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-display transition-colors duration-300;
   }
+
+  /* ── Global Dark Mode Text Overrides ─────────────────────── */
+  .dark .text-slate-900 { color: #f8fafc !important; }
+  .dark .text-slate-800 { color: #f1f5f9 !important; }
+  .dark .text-slate-700 { color: #e2e8f0 !important; }
+  .dark .text-slate-600 { color: #cbd5e1 !important; }
+  .dark .text-slate-500 { color: #94a3b8 !important; }
+  .dark .text-slate-400 { color: #94a3b8 !important; }
+
+  /* ── Global Dark Mode Background Overrides ───────────────── */
+  .dark .bg-white { background-color: #0f172a !important; }
+  .dark .bg-slate-50 { background-color: #1e293b !important; }
+  .dark .bg-slate-100 { background-color: #1e293b !important; }
+  .dark .bg-red-50 { background-color: rgba(127, 29, 29, 0.25) !important; }
+  .dark .bg-emerald-50 { background-color: rgba(6, 78, 59, 0.25) !important; }
+  .dark .bg-amber-50 { background-color: rgba(120, 53, 15, 0.25) !important; }
+  .dark .bg-indigo-50 { background-color: rgba(49, 46, 129, 0.25) !important; }
+  .dark .bg-blue-50 { background-color: rgba(30, 58, 138, 0.25) !important; }
+  .dark .bg-orange-50 { background-color: rgba(124, 45, 18, 0.25) !important; }
+
+  /* ── Global Dark Mode Border Overrides ───────────────────── */
+  .dark .border-slate-50 { border-color: #1e293b !important; }
+  .dark .border-slate-100 { border-color: #334155 !important; }
+  .dark .border-slate-200 { border-color: #334155 !important; }
+  .dark .border-slate-300 { border-color: #475569 !important; }
+
+  /* ── Global Dark Mode Hover Overrides ────────────────────── */
+  .dark .hover\:bg-slate-50:hover { background-color: #1e293b !important; }
+  .dark .hover\:bg-slate-100:hover { background-color: #334155 !important; }
+
+  /* ── Dark mode for input fields ──────────────────────────── */
+  .dark input, .dark textarea, .dark select {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-color: #475569 !important;
+  }
+  .dark input::placeholder, .dark textarea::placeholder {
+    color: #64748b !important;
+  }
+  .dark input:focus, .dark textarea:focus, .dark select:focus {
+    border-color: #0d9488 !important;
+  }
+
+  /* ── Dark mode table overrides ──────────────────────────── */
+  .dark th {
+    color: #cbd5e1 !important;
+    border-color: #334155 !important;
+  }
+  .dark td {
+    color: #e2e8f0 !important;
+    border-color: #1e293b !important;
+  }
+  .dark tr:hover {
+    background-color: #1e293b !important;
+  }
 }
 
 .dashboard-card {
-  @apply bg-white rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md;
+  @apply bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-md;
 }
 
 .btn-primary {
@@ -39,6 +94,154 @@
   @apply flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors;
 }
 
+.dark .sidebar-link {
+  color: #cbd5e1 !important;
+}
+.dark .sidebar-link:hover {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+.dark .sidebar-link svg {
+  color: #94a3b8 !important;
+}
+.dark .sidebar-link:hover svg {
+  color: #0d9488 !important;
+}
+
 .sidebar-link-active {
   @apply bg-primary/10 text-primary font-semibold;
+}
+
+.dark .sidebar-link-active {
+  background-color: rgba(13, 148, 136, 0.15) !important;
+  color: #2dd4bf !important;
+}
+.dark .sidebar-link-active svg {
+  color: #2dd4bf !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ENHANCED DARK MODE — Scrollbar, Charts, Cards, Modals, etc.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Custom Scrollbar ────────────────────────────────────────── */
+.custom-scrollbar::-webkit-scrollbar,
+.dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 999px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* ── Recharts / Chart Dark Mode ──────────────────────────────── */
+.dark .recharts-cartesian-grid line {
+  stroke: #1e293b !important;
+}
+.dark .recharts-text {
+  fill: #94a3b8 !important;
+}
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;
+}
+.dark .recharts-tooltip-item {
+  color: #e2e8f0 !important;
+}
+.dark .recharts-tooltip-label {
+  color: #f1f5f9 !important;
+}
+.dark .recharts-legend-item-text {
+  color: #cbd5e1 !important;
+}
+.dark .recharts-cursor {
+  fill: rgba(30, 41, 59, 0.5) !important;
+}
+
+/* ── Dashboard Card Glow on Hover (Dark Mode) ────────────────── */
+.dark .dashboard-card:hover {
+  border-color: rgba(13, 148, 136, 0.3) !important;
+  box-shadow: 0 0 20px rgba(13, 148, 136, 0.08), 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+
+/* ── Modal / Dialog Backdrop ─────────────────────────────────── */
+.dark [role="dialog"],
+.dark .modal-content {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+/* ── Dropdown Menus ──────────────────────────────────────────── */
+.dark [role="menu"],
+.dark [role="listbox"],
+.dark .dropdown-menu {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
+}
+.dark [role="menuitem"]:hover,
+.dark [role="option"]:hover {
+  background-color: #1e293b !important;
+}
+
+/* ── Text Selection Color ────────────────────────────────────── */
+.dark ::selection {
+  background-color: rgba(13, 148, 136, 0.35);
+  color: #f8fafc;
+}
+
+/* ── Dividers / HR ───────────────────────────────────────────── */
+.dark hr {
+  border-color: #334155 !important;
+}
+
+/* ── Code / Pre Blocks ───────────────────────────────────────── */
+.dark code, .dark pre {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+}
+
+/* ── Focus Ring Dark Mode ────────────────────────────────────── */
+.dark .ring-slate-200 { --tw-ring-color: #334155 !important; }
+.dark .ring-slate-300 { --tw-ring-color: #475569 !important; }
+
+/* ── Shadow Overrides ────────────────────────────────────────── */
+.dark .shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.3) !important; }
+.dark .shadow-md { box-shadow: 0 4px 6px rgba(0,0,0,0.4) !important; }
+.dark .shadow-lg { box-shadow: 0 10px 15px rgba(0,0,0,0.4) !important; }
+.dark .shadow-xl { box-shadow: 0 20px 25px rgba(0,0,0,0.5) !important; }
+
+/* ── Smooth Scrolling ────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Checkbox / Radio Dark Mode ──────────────────────────────── */
+.dark input[type="checkbox"],
+.dark input[type="radio"] {
+  background-color: #1e293b !important;
+  border-color: #475569 !important;
+}
+.dark input[type="checkbox"]:checked,
+.dark input[type="radio"]:checked {
+  background-color: #0d9488 !important;
+  border-color: #0d9488 !important;
+}
+
+/* ── Placeholder / Empty States ──────────────────────────────── */
+.dark .text-slate-300 { color: #64748b !important; }
+
+/* ── Link Hover ──────────────────────────────────────────────── */
+.dark a.text-primary:hover {
+  color: #2dd4bf !important;
 }

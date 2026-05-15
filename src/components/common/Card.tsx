@@ -14,9 +14,9 @@ export const Card = ({ children, className, title, description, onClick }: CardP
   return (
     <div className={cn('dashboard-card overflow-hidden', className)} onClick={onClick}>
       {(title || description) && (
-        <div className="border-b border-slate-100 p-4 md:p-6">
-          {title && <h3 className="text-lg font-bold text-slate-900">{title}</h3>}
-          {description && <p className="text-sm text-slate-500 mt-1">{description}</p>}
+        <div className="border-b border-slate-100 dark:border-slate-800 p-4 md:p-6">
+          {title && <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">{title}</h3>}
+          {description && <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{description}</p>}
         </div>
       )}
       <div className="p-4 md:p-6">{children}</div>
